@@ -1,4 +1,4 @@
-import { post } from './api.js';
+﻿import { post } from './api.js';
 
 const loginForm = document.getElementById('loginForm');
 const errorDiv = document.getElementById('errorMessage');
@@ -17,11 +17,11 @@ if (loginForm) {
       // redirect berdasarkan role
       const role = data.user.role?.toLowerCase?.() || '';
       if (role.includes('mahasiswa')) {
-        window.location.href = '/mahasiswa.html';
+        window.location.href = '/dashboard-mahasiswa.html';
       } else if (role.includes('sarpras')) {
         window.location.href = '/sarpras.html';
       } else if (role.includes('security')) {
-        window.location.href = '/security.html';
+        window.location.href = '/dashboard-security.html';
       } else {
         window.location.href = '/sarpras.html';
       }
