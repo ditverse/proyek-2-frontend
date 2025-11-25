@@ -129,7 +129,11 @@
                                 ` : ''}
                                 <div class="col-span-2">
                                     <p class="text-sm text-gray-600">Surat Digital</p>
-                                    <a href="${data.surat_digital_url}" target="_blank" class="text-blue-600 hover:text-blue-800">Lihat Surat</a>
+                                    ${data.surat_digital_url ? `
+                                        <button type="button" onclick="openSurat(${peminjamanId})" class="text-blue-600 hover:text-blue-800 underline">
+                                            Lihat Surat
+                                        </button>
+                                    ` : `<span class="text-gray-400 text-sm italic">Belum ada</span>`}
                                 </div>
                             </div>
                         </div>
@@ -193,6 +197,19 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = 'index.html';
+        }
+
+        async function openSurat(id) {
+            try {
+                const data = await apiCall(`/peminjaman/${id}/surat`);
+                if (data && data.signed_url) {
+                    window.open(data.signed_url, '_blank');
+                } else {
+                    alert('Surat tidak tersedia.');
+                }
+            } catch (error) {
+                alert(`Gagal membuka surat: ${error.message}`);
+            }
         }
 
     </script>

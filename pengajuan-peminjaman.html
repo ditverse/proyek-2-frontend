@@ -74,8 +74,13 @@
                 </div>
 
                 <div>
-                    <label for="surat_digital_url" class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">URL Surat Digital *</label>
-                    <input type="url" id="surat_digital_url" name="surat_digital_url" required placeholder="https://..." class="w-full px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white">
+                    <label for="surat_file" class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">Unggah Surat Digital (PDF) *</label>
+                    <div class="space-y-2">
+                        <input type="file" id="surat_file" name="surat_file" accept="application/pdf" required class="w-full px-4 py-3 border border-dashed border-orange-200 rounded-2xl bg-white focus:ring-2 focus:ring-orange-300 focus:outline-none cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200">
+                        <p class="text-xs text-gray-500" id="suratHelper">Format PDF, maksimum 2MB. Satu surat dapat digunakan untuk semua tanggal yang diajukan.</p>
+                        <p class="text-xs text-green-600 hidden" id="suratInfo"></p>
+                        <p class="text-xs text-red-600 hidden" id="suratError"></p>
+                    </div>
                 </div>
 
                 <div class="space-y-4">
@@ -103,8 +108,48 @@
     <script>
         checkAuth();
 
-        // Variabel global untuk menyimpan data tanggal
+        // Variabel global
         let selectedDateObjects = [];
+        const MAX_SURAT_SIZE = 2 * 1024 * 1024; // 2MB
+        const SURAT_PLACEHOLDER = "uploaded-via-form";
+        let suratFile = null;
+        const suratInput = document.getElementById('surat_file');
+        const suratError = document.getElementById('suratError');
+        const suratInfo = document.getElementById('suratInfo');
+
+        suratInput.addEventListener('change', () => {
+            suratError.classList.add('hidden');
+            suratError.textContent = '';
+            suratInfo.classList.add('hidden');
+            suratInfo.textContent = '';
+
+            const file = suratInput.files[0];
+            if (!file) {
+                suratFile = null;
+                return;
+            }
+
+            if (file.type !== 'application/pdf') {
+                suratError.textContent = 'File harus berupa PDF.';
+                suratError.classList.remove('hidden');
+                suratInput.value = '';
+                suratFile = null;
+                return;
+            }
+
+            if (file.size > MAX_SURAT_SIZE) {
+                suratError.textContent = 'Ukuran file maksimal 2MB.';
+                suratError.classList.remove('hidden');
+                suratInput.value = '';
+                suratFile = null;
+                return;
+            }
+
+            suratFile = file;
+            const sizeKB = (file.size / 1024).toFixed(0);
+            suratInfo.textContent = `File siap diunggah (${sizeKB} KB).`;
+            suratInfo.classList.remove('hidden');
+        });
 
         // --- 1. CONFIG FLATPICKR TANGGAL ---
         flatpickr("#selected_dates", {
@@ -261,6 +306,11 @@
                 return;
             }
 
+            if (!suratFile) {
+                alert("Mohon unggah surat digital (PDF) terlebih dahulu.");
+                return;
+            }
+
             // Validasi input jam di setiap baris
             for (let i = 0; i < selectedDateObjects.length; i++) {
                 const startVal = document.getElementById(`start_${i}`).value;
@@ -296,6 +346,7 @@
             try {
                 // LOOPING KIRIM DATA
                 for (let i = 0; i < selectedDateObjects.length; i++) {
+                    btnSubmit.textContent = `Mengajukan jadwal ${i + 1} dari ${selectedDateObjects.length}...`;
                     const dateVal = document.querySelector(`input[name="date_val_${i}"]`).value; // YYYY-MM-DD
                     const startVal = document.getElementById(`start_${i}`).value; // HH:mm
                     const endVal = document.getElementById(`end_${i}`).value;   // HH:mm
@@ -309,14 +360,17 @@
                         tanggal_mulai: fullStartDate.toISOString(),
                         tanggal_selesai: fullEndDate.toISOString(),
                         keperluan: formData.get('keperluan'),
-                        surat_digital_url: formData.get('surat_digital_url'),
+                        surat_digital_url: SURAT_PLACEHOLDER,
                         barang: barang
                     };
 
-                    await apiCall('/peminjaman', {
+                    const peminjamanBaru = await apiCall('/peminjaman', {
                         method: 'POST',
                         body: JSON.stringify(payload)
                     });
+
+                    btnSubmit.textContent = `Mengunggah surat untuk jadwal ${i + 1}...`;
+                    await uploadSuratDigital(peminjamanBaru.id, suratFile);
                 }
 
                 alert('Semua jadwal berhasil diajukan!');
@@ -330,6 +384,27 @@
                 btnSubmit.textContent = "Coba Lagi";
             }
         });
+
+        async function uploadSuratDigital(peminjamanId, file) {
+            const token = localStorage.getItem('token');
+            const payload = new FormData();
+            payload.append('surat', file);
+
+            const response = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/upload-surat`, {
+                method: 'POST',
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                body: payload
+            });
+
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type') || '';
+                const errorPayload = contentType.includes('application/json') ? await response.json() : await response.text();
+                const message = typeof errorPayload === 'string' ? errorPayload : errorPayload.error || 'Gagal mengunggah surat digital';
+                throw new Error(message);
+            }
+
+            return response.json();
+        }
 
         function logout() {
             localStorage.removeItem('token');

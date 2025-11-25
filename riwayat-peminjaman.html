@@ -134,13 +134,18 @@
                                 </div>
                                 
                                 <div class="flex flex-col gap-2 md:items-end">
-                                    <a href="${p.surat_digital_url}" target="_blank" 
-                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-orange-200 text-orange-600 text-sm font-semibold hover:bg-orange-50 transition whitespace-nowrap">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                        </svg>
-                                        Lihat Surat
-                                    </a>
+                                    ${p.surat_digital_url ? `
+                                        <button type="button"
+                                            onclick="openSurat(${p.id})"
+                                            class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-orange-200 text-orange-600 text-sm font-semibold hover:bg-orange-50 transition whitespace-nowrap">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                            </svg>
+                                            Lihat Surat
+                                        </button>
+                                    ` : `
+                                        <span class="text-xs text-gray-500 italic">Belum ada surat digital</span>
+                                    `}
                                 </div>
                             </div>
                         </div>
@@ -195,6 +200,19 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = 'index.html';
+        }
+
+        async function openSurat(peminjamanId) {
+            try {
+                const data = await apiCall(`/peminjaman/${peminjamanId}/surat`);
+                if (data && data.signed_url) {
+                    window.open(data.signed_url, '_blank');
+                } else {
+                    alert('Surat tidak tersedia.');
+                }
+            } catch (error) {
+                alert(`Gagal membuka surat: ${error.message}`);
+            }
         }
 
         loadPeminjaman();
