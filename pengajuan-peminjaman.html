@@ -6,16 +6,13 @@
     <title>Pengajuan Peminjaman - Sistem Peminjaman Sarpras</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
-
     <style>
         body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Style tambahan agar input flatpickr pas dengan desainmu */
-        .flatpickr-calendar { font-family: 'Inter', sans-serif; }
+        /* Style agar time picker rapi */
+        .flatpickr-time { border-top: none !important; } 
     </style>
 </head>
 <body class="bg-orange-50 text-gray-800 min-h-screen pb-12">
@@ -29,12 +26,8 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <a href="dashboard-mahasiswa.html" class="px-4 py-2 rounded-lg border border-orange-200 text-sm font-semibold text-orange-600 bg-white hover:bg-orange-50 hover:border-orange-300 transition">
-                    Kembali ke Dashboard
-                </a>
-                <button onclick="logout()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-5 rounded-lg text-sm transition-colors shadow-md shadow-orange-200/80">
-                    Logout
-                </button>
+                <a href="dashboard-mahasiswa.html" class="px-4 py-2 rounded-lg border border-orange-200 text-sm font-semibold text-orange-600 bg-white hover:bg-orange-50 hover:border-orange-300 transition">Kembali</a>
+                <button onclick="logout()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-5 rounded-lg text-sm transition-colors shadow-md shadow-orange-200/80">Logout</button>
             </div>
         </div>
     </nav>
@@ -43,32 +36,12 @@
         <section class="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
              <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image:url('https://www.transparenttextures.com/patterns/topography.png');"></div>
              <div class="relative space-y-4">
-                 <p class="uppercase text-xs tracking-[0.4em] text-orange-100 font-semibold">Pengajuan Ruangan/Barang</p>
-                 <h2 class="text-3xl font-semibold leading-tight">Lengkapi data pengajuan sebelum mengirim</h2>
-                 <p class="text-orange-50/90 text-sm max-w-2xl">Harap pastikan jadwal, keperluan, serta surat digital telah disiapkan. Admin Sarpras akan memeriksa permohonanmu dalam waktu maksimal 2 x 24 jam.</p>
-                 <div class="grid gap-3 md:grid-cols-3 text-sm font-semibold">
-                     <div class="bg-white/15 border border-white/30 rounded-2xl px-4 py-3 backdrop-blur">
-                         <p class="text-orange-100/90 text-xs uppercase tracking-[0.35em] mb-1">Langkah 1</p>
-                         <p>Isi data ruangan</p>
-                     </div>
-                     <div class="bg-white/15 border border-white/30 rounded-2xl px-4 py-3 backdrop-blur">
-                         <p class="text-orange-100/90 text-xs uppercase tracking-[0.35em] mb-1">Langkah 2</p>
-                         <p>Upload surat digital</p>
-                     </div>
-                     <div class="bg-white/15 border border-white/30 rounded-2xl px-4 py-3 backdrop-blur">
-                         <p class="text-orange-100/90 text-xs uppercase tracking-[0.35em] mb-1">Langkah 3</p>
-                         <p>Tambahkan daftar barang</p>
-                     </div>
-                 </div>
+                 <h2 class="text-3xl font-semibold leading-tight">Jadwal Fleksibel</h2>
+                 <p class="text-orange-50/90 text-sm max-w-2xl">Pilih tanggal-tanggal yang kamu butuhkan, lalu atur jam pemakaian yang berbeda untuk setiap tanggalnya.</p>
              </div>
         </section>
 
         <section class="bg-white rounded-3xl shadow-sm border border-orange-100 p-8 space-y-8">
-            <div class="flex flex-col gap-2">
-                <p class="text-xs uppercase tracking-[0.35em] text-orange-500 font-semibold">Formulir Pengajuan</p>
-                <h3 class="text-2xl font-bold text-gray-900">Detail peminjaman yang akan diajukan</h3>
-            </div>
-
             <form id="peminjamanForm" class="space-y-6">
                 <div class="grid gap-6 md:grid-cols-2">
                     <div>
@@ -78,19 +51,21 @@
                         </select>
                     </div>
                     <div class="bg-orange-50/70 border border-orange-100 rounded-2xl p-4 text-sm text-gray-600">
-                        Ruangan kosong? Kamu tetap dapat meminjam barang tanpa memilih ruangan. Pastikan surat digital menyebutkan lokasi penggunaan.
+                        Ruangan kosong? Kamu tetap dapat meminjam barang tanpa memilih ruangan.
                     </div>
                 </div>
 
-                <div class="grid gap-6 md:grid-cols-2">
-                    <div>
-                        <label for="tanggal_mulai" class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">Tanggal & Waktu Mulai *</label>
-                        <input type="text" id="tanggal_mulai" name="tanggal_mulai" required placeholder="Pilih tanggal & jam..." class="w-full px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white">
+                <div>
+                    <label for="selected_dates" class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">Langkah 1: Pilih Tanggal-Tanggal *</label>
+                    <input type="text" id="selected_dates" name="selected_dates" required placeholder="Klik untuk memilih tanggal..." class="w-full px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white shadow-sm">
+                </div>
+
+                <div id="scheduleContainer" class="hidden space-y-4 bg-gray-50/50 p-6 rounded-3xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                        <label class="text-xs font-semibold text-gray-700 uppercase tracking-widest">Langkah 2: Atur Jam per Tanggal</label>
                     </div>
-                    <div>
-                        <label for="tanggal_selesai" class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">Tanggal & Waktu Selesai *</label>
-                        <input type="text" id="tanggal_selesai" name="tanggal_selesai" required placeholder="Pilih tanggal & jam..." class="w-full px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white">
-                    </div>
+                    <div id="dynamicInputs" class="space-y-3"></div>
                 </div>
 
                 <div>
@@ -101,62 +76,136 @@
                 <div>
                     <label for="surat_digital_url" class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">URL Surat Digital *</label>
                     <input type="url" id="surat_digital_url" name="surat_digital_url" required placeholder="https://..." class="w-full px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white">
-                    <p class="text-xs text-gray-500 mt-2">Unggah surat ke layanan penyimpanan (mis. Supabase Storage) lalu tempelkan URL akses publik di sini.</p>
                 </div>
 
                 <div class="space-y-4">
                     <label class="block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-2">Barang yang Dipinjam (Opsional)</label>
                     <div id="barangList" class="space-y-3"></div>
                     <button type="button" onclick="addBarangItem()" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700">
-                        <span class="w-5 h-5 rounded-full border border-orange-200 flex items-center justify-center">+</span>
-                        Tambah Barang
+                        <span class="w-5 h-5 rounded-full border border-orange-200 flex items-center justify-center">+</span> Tambah Barang
                     </button>
                 </div>
 
                 <div class="flex flex-col gap-3 md:flex-row">
-                    <button type="submit" class="flex-1 bg-orange-500 text-white py-3 rounded-2xl font-semibold hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 transition shadow-lg shadow-orange-200/60">
+                    <button type="submit" id="btnSubmit" class="flex-1 bg-orange-500 text-white py-3 rounded-2xl font-semibold hover:bg-orange-600 transition shadow-lg shadow-orange-200/60 disabled:bg-gray-300 disabled:cursor-not-allowed">
                         Ajukan Peminjaman
                     </button>
-                    <a href="dashboard-mahasiswa.html" class="flex-1 bg-white text-gray-700 py-3 rounded-2xl font-semibold border border-orange-100 text-center hover:bg-orange-50 transition">
-                        Batal & Kembali
-                    </a>
+                    <a href="dashboard-mahasiswa.html" class="flex-1 bg-white text-gray-700 py-3 rounded-2xl font-semibold border border-orange-100 text-center hover:bg-orange-50 transition">Batal & Kembali</a>
                 </div>
-
                 <div id="errorMessage" class="text-red-600 text-sm hidden"></div>
             </form>
         </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script> <script src="assets/js/api.legacy.js"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script src="assets/js/api.legacy.js"></script>
     <script>
         checkAuth();
-        
-        // --- 4. CONFIGURASI TANGGAL & JAM DISINI ---
-        // Ini akan mengubah input biasa menjadi datepicker keren
-        // Format Tampil ke User: d-m-Y H:i (25-11-2025 14:00) - 24 Jam tanpa AM/PM
-        // Format Kirim ke Server: Y-m-d H:i (Agar mudah diolah JS Date)
-        
-        const dateConfig = {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i", // Format value asli (biar aman masuk database/JS)
-            altInput: true,          // Aktifkan input alternatif untuk tampilan user
-            altFormat: "d-m-Y H:i",  // Format yang DILIHAT user (Tanpa AM/PM, format Indo)
-            time_24hr: true,         // Wajib true untuk menghilangkan AM/PM
-            locale: "id",            // Bahasa Indonesia (Sen, Sel, Rab, dst)
-            minDate: "today"         // Opsional: Tidak boleh pilih tanggal kemarin
-        };
 
-        flatpickr("#tanggal_mulai", dateConfig);
-        flatpickr("#tanggal_selesai", dateConfig);
-        // -------------------------------------------
+        // Variabel global untuk menyimpan data tanggal
+        let selectedDateObjects = [];
 
+        // --- 1. CONFIG FLATPICKR TANGGAL ---
+        flatpickr("#selected_dates", {
+            mode: "multiple",       
+            dateFormat: "Y-m-d",    
+            altInput: true,
+            altFormat: "j F Y",     
+            minDate: "today",
+            locale: "id",
+            onChange: function(selectedDates) {
+                selectedDateObjects = selectedDates;
+                generateTimeInputs(selectedDates);
+            }
+        });
+
+        // --- 2. FUNGSI GENERATE INPUT JAM DINAMIS (DIPERBARUI) ---
+        function generateTimeInputs(dates) {
+            const container = document.getElementById('scheduleContainer');
+            const inputsDiv = document.getElementById('dynamicInputs');
+            
+            // Bersihkan input lama
+            inputsDiv.innerHTML = '';
+
+            if (dates.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+
+            // Sort tanggal biar urut
+            dates.sort((a, b) => a - b);
+
+            dates.forEach((date, index) => {
+                const dateLabel = date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                const dateISO = date.toISOString().split('T')[0];
+
+                const row = document.createElement('div');
+                row.className = "bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center gap-4 animate-fade-in";
+                
+                row.innerHTML = `
+                    <div class="md:w-1/3">
+                        <span class="text-xs font-bold text-orange-500 uppercase tracking-wider block mb-1">Tanggal ${index + 1}</span>
+                        <p class="font-semibold text-gray-800">${dateLabel}</p>
+                        <input type="hidden" name="date_val_${index}" value="${dateISO}">
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-gray-400 mb-1 block">Mulai</label>
+                            <input type="text" id="start_${index}" class="time-picker w-full px-3 py-2 border border-orange-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-300 text-center font-medium bg-gray-50 focus:bg-white" placeholder="09:00" required>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-gray-400 mb-1 block">Selesai</label>
+                            <input type="text" id="end_${index}" class="time-picker w-full px-3 py-2 border border-orange-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-300 text-center font-medium bg-gray-50 focus:bg-white" placeholder="12:00" required>
+                        </div>
+                    </div>
+                `;
+                inputsDiv.appendChild(row);
+
+                // --- LOGIC VALIDASI JAM ---
+
+                // 1. Init Flatpickr untuk JAM SELESAI terlebih dahulu (Simpan ke variabel)
+                const endPicker = flatpickr(`#end_${index}`, {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                    time_24hr: true,
+                    locale: "id"
+                });
+
+                // 2. Init Flatpickr untuk JAM MULAI dengan Event Listener
+                flatpickr(`#start_${index}`, {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                    time_24hr: true,
+                    locale: "id",
+                    onChange: function(selectedDates, dateStr, instance) {
+                        // Saat jam mulai dipilih, update aturan jam selesai
+                        
+                        // A. Set minTime jam selesai = jam mulai yang dipilih
+                        endPicker.set('minTime', dateStr);
+
+                        // B. Auto Clear: Jika user sebelumnya sudah pilih jam selesai (misal 10:00)
+                        //    Lalu mengubah jam mulai jadi lebih besar (misal 12:00),
+                        //    Maka jam selesai 10:00 jadi tidak valid & harus dihapus.
+                        const currentEndStr = endPicker.input.value;
+                        if (currentEndStr && currentEndStr <= dateStr) {
+                             endPicker.clear();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // ... (Logic Barang & Ruangan tetap sama) ...
         let barangItems = [];
         let ruangans = [];
         let barangs = [];
 
         async function loadRuangan() {
-            // ... (kode sama) ...
             try {
                 ruangans = await apiCall('/ruangan');
                 const select = document.getElementById('ruangan_id');
@@ -166,25 +215,17 @@
                     option.textContent = `${r.kode_ruangan} - ${r.nama_ruangan}`;
                     select.appendChild(option);
                 });
-            } catch (error) {
-                console.error('Error loading ruangan:', error);
-            }
+            } catch (error) { console.error(error); }
         }
 
         async function loadBarang() {
-            // ... (kode sama) ...
-            try {
-                barangs = await apiCall('/barang');
-            } catch (error) {
-                console.error('Error loading barang:', error);
-            }
+            try { barangs = await apiCall('/barang'); } 
+            catch (error) { console.error(error); }
         }
 
         function addBarangItem() {
-            // ... (kode sama) ...
             const index = barangItems.length;
             barangItems.push({ barang_id: '', jumlah: 1 });
-            
             const container = document.getElementById('barangList');
             const div = document.createElement('div');
             div.className = 'flex flex-col gap-3 md:flex-row md:items-center md:gap-3';
@@ -193,18 +234,14 @@
                     <option value="">Pilih Barang</option>
                     ${barangs.map(b => `<option value="${b.id}">${b.kode_barang} - ${b.nama_barang} (Tersedia: ${b.jumlah_tersedia})</option>`).join('')}
                 </select>
-                <input type="number" name="jumlah_${index}" min="1" value="1" required
-                    class="w-full md:w-32 px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white" placeholder="Jumlah">
-                <button type="button" onclick="removeBarangItem(${index})" class="px-4 py-3 rounded-2xl border border-red-100 text-red-600 font-semibold hover:bg-red-50 transition">
-                    Hapus
-                </button>
+                <input type="number" name="jumlah_${index}" min="1" value="1" required class="w-full md:w-32 px-4 py-3 border border-orange-100 rounded-2xl focus:ring-2 focus:ring-orange-300 focus:outline-none bg-white" placeholder="Jumlah">
+                <button type="button" onclick="removeBarangItem(${index})" class="px-4 py-3 rounded-2xl border border-red-100 text-red-600 font-semibold hover:bg-red-50 transition">Hapus</button>
             `;
             div.id = `barang-item-${index}`;
             container.appendChild(div);
         }
 
         function removeBarangItem(index) {
-            // ... (kode sama) ...
             const item = document.getElementById(`barang-item-${index}`);
             if (item) {
                 item.remove();
@@ -214,11 +251,33 @@
 
         document.getElementById('peminjamanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnSubmit = document.getElementById('btnSubmit');
+            const errorMsg = document.getElementById('errorMessage');
             
             const formData = new FormData(e.target);
-            const barang = [];
             
-            // Collect barang items
+            if (selectedDateObjects.length === 0) {
+                alert("Mohon pilih setidaknya satu tanggal.");
+                return;
+            }
+
+            // Validasi input jam di setiap baris
+            for (let i = 0; i < selectedDateObjects.length; i++) {
+                const startVal = document.getElementById(`start_${i}`).value;
+                const endVal = document.getElementById(`end_${i}`).value;
+                
+                if (!startVal || !endVal) {
+                    alert(`Mohon lengkapi jam mulai dan selesai untuk tanggal ke-${i+1}.`);
+                    return;
+                }
+                if (startVal >= endVal) {
+                    alert(`Jam selesai harus lebih besar dari jam mulai pada tanggal ke-${i+1}.`);
+                    return;
+                }
+            }
+
+            // Collect Barang
+            const barang = [];
             for (let i = 0; i < barangItems.length; i++) {
                 const barangSelect = document.querySelector(`select[name="barang_${i}"]`);
                 const jumlahInput = document.querySelector(`input[name="jumlah_${i}"]`);
@@ -230,31 +289,45 @@
                 }
             }
 
-            // Note: Karena pakai flatpickr dengan altInput, formData akan mengambil value dari input hidden
-            // yang formatnya sudah kita set "Y-m-d H:i". Jadi new Date() aman membacanya.
-            const tanggalMulai = new Date(formData.get('tanggal_mulai')).toISOString();
-            const tanggalSelesai = new Date(formData.get('tanggal_selesai')).toISOString();
-
-            const payload = {
-                ruangan_id: formData.get('ruangan_id') ? parseInt(formData.get('ruangan_id')) : null,
-                tanggal_mulai: tanggalMulai,
-                tanggal_selesai: tanggalSelesai,
-                keperluan: formData.get('keperluan'),
-                surat_digital_url: formData.get('surat_digital_url'),
-                barang: barang
-            };
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = `Memproses...`;
+            errorMsg.classList.add('hidden');
 
             try {
-                await apiCall('/peminjaman', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                
-                alert('Pengajuan berhasil dibuat!');
+                // LOOPING KIRIM DATA
+                for (let i = 0; i < selectedDateObjects.length; i++) {
+                    const dateVal = document.querySelector(`input[name="date_val_${i}"]`).value; // YYYY-MM-DD
+                    const startVal = document.getElementById(`start_${i}`).value; // HH:mm
+                    const endVal = document.getElementById(`end_${i}`).value;   // HH:mm
+
+                    // Gabung Tanggal + Jam
+                    const fullStartDate = new Date(`${dateVal}T${startVal}:00`);
+                    const fullEndDate = new Date(`${dateVal}T${endVal}:00`);
+
+                    const payload = {
+                        ruangan_id: formData.get('ruangan_id') ? parseInt(formData.get('ruangan_id')) : null,
+                        tanggal_mulai: fullStartDate.toISOString(),
+                        tanggal_selesai: fullEndDate.toISOString(),
+                        keperluan: formData.get('keperluan'),
+                        surat_digital_url: formData.get('surat_digital_url'),
+                        barang: barang
+                    };
+
+                    await apiCall('/peminjaman', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                alert('Semua jadwal berhasil diajukan!');
                 window.location.href = 'riwayat-peminjaman.html';
+
             } catch (error) {
-                document.getElementById('errorMessage').textContent = error.message;
-                document.getElementById('errorMessage').classList.remove('hidden');
+                console.error(error);
+                errorMsg.textContent = `Terjadi kesalahan: ${error.message}`;
+                errorMsg.classList.remove('hidden');
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Coba Lagi";
             }
         });
 
