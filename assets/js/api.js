@@ -8,7 +8,7 @@ function getAuthHeaders() {
   };
 }
 
-async function apiCall(path, options = {}) {
+async function apiCall(path, options = {}, skipAuthRedirect = false) {
   const url = `${API_BASE_URL}${path}`;
   const config = {
     ...options,
@@ -20,8 +20,8 @@ async function apiCall(path, options = {}) {
 
   const response = await fetch(url, config);
 
-  if (response.status === 401) {
-    // Unauthorized, redirect to login
+  if (response.status === 401 && !skipAuthRedirect) {
+    // Unauthorized, redirect to login (skip for login attempts)
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/index.html';
@@ -51,8 +51,8 @@ export async function get(path) {
   return apiCall(path, { method: 'GET' });
 }
 
-export async function post(path, body) {
-  return apiCall(path, { method: 'POST', body: JSON.stringify(body) });
+export async function post(path, body, skipAuthRedirect = false) {
+  return apiCall(path, { method: 'POST', body: JSON.stringify(body) }, skipAuthRedirect);
 }
 
 export async function patch(path, body) {
