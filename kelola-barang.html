@@ -1,92 +1,247 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Barang - Sistem Peminjaman Sarpras</title>
+    <title>Kelola Barang - Admin Sarpras</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="sarpras.html" class="text-xl font-bold text-gray-800">Sistem Peminjaman Sarpras</a>
+
+<body class="bg-orange-50 text-gray-800 min-h-screen pb-12">
+    <!-- Navbar -->
+    <nav class="bg-white/95 backdrop-blur border-b border-orange-100 sticky top-0 z-40 shadow-sm">
+        <div
+            class="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <img src="https://raw.githubusercontent.com/saripudin14/img/refs/heads/main/logo.png" alt="Logo Sarpras"
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl border border-orange-100 shadow-lg shadow-orange-200/70 object-contain bg-white/70 p-1.5 sm:p-2">
+                <div>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-widest text-orange-500 font-semibold">Unit
+                        Sarana & Prasarana
+                    </p>
+                    <h1 class="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Kelola Barang</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="logout()" class="text-red-600 hover:text-red-800">Logout</button>
-                </div>
+            </div>
+            <div class="flex gap-2 sm:gap-3">
+                <a href="sarpras.html"
+                    class="w-10 h-10 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl border border-orange-200 flex items-center justify-center text-orange-600 bg-white hover:bg-orange-50 hover:border-orange-300 transition-all shadow-sm"
+                    title="Kembali ke Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                </a>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Kelola Barang</h2>
-            <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                + Tambah Barang
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">
+
+        <!-- Hero Section -->
+        <section
+            class="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 text-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20 pointer-events-none"
+                style="background-image:url('https://www.transparenttextures.com/patterns/topography.png');"></div>
+            <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
+                <div>
+                    <p
+                        class="uppercase text-[10px] sm:text-xs tracking-[0.3em] sm:tracking-[0.4em] text-orange-100 mb-1 sm:mb-2 font-semibold">
+                        Admin Panel</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold leading-tight">Manajemen Barang</h2>
+                    <p class="text-orange-50/90 text-xs sm:text-sm mt-1 sm:mt-2 max-w-xl">Kelola semua data barang yang
+                        tersedia untuk peminjaman</p>
+                </div>
+                <div id="statsBadge"
+                    class="bg-white/15 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-white/30 backdrop-blur text-center">
+                    <p class="text-2xl sm:text-3xl font-bold" id="totalCount">0</p>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-widest text-orange-100 font-semibold">Total
+                        Barang</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Bar -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
+            <div
+                class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-orange-100 flex items-center gap-3 sm:gap-4 shadow-sm flex-1">
+                <div
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 border border-orange-100">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-900 text-sm sm:text-base">Daftar Barang</p>
+                    <p class="text-xs sm:text-sm text-gray-500">Klik untuk melihat detail atau mengedit barang</p>
+                </div>
+            </div>
+            <button onclick="openCreateModal()"
+                class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-200/50 text-sm sm:text-base flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Tambah Barang
             </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tersedia</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="barangTable" class="bg-white divide-y divide-gray-200">
-                    <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">Memuat data...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Loading State -->
+        <div id="loadingState"
+            class="bg-white rounded-2xl sm:rounded-3xl p-12 sm:p-16 text-center border border-orange-100 shadow-sm">
+            <div
+                class="w-12 h-12 sm:w-16 sm:h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4 sm:mb-6">
+            </div>
+            <p class="text-gray-500 font-medium text-base sm:text-lg">Mengambil data dari sistem...</p>
+            <p class="text-gray-400 text-xs sm:text-sm mt-2">Mohon tunggu sebentar</p>
         </div>
-    </div>
+
+        <!-- Grid Container -->
+        <div id="barangContainer" class="hidden grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState"
+            class="hidden bg-white rounded-2xl sm:rounded-3xl p-12 sm:p-16 text-center border border-dashed border-gray-200">
+            <div
+                class="w-14 h-14 sm:w-16 sm:h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-100">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 text-orange-500" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
+                    </path>
+                </svg>
+            </div>
+            <p class="text-gray-900 font-semibold text-base sm:text-lg mb-1">Belum ada barang</p>
+            <p class="text-gray-500 text-xs sm:text-sm">Klik tombol "Tambah Barang" untuk menambahkan data baru</p>
+        </div>
+
+    </main>
 
     <!-- Modal Create/Edit -->
-    <div id="barangModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 id="modalTitle" class="text-lg font-semibold text-gray-800 mb-4">Tambah Barang</h3>
-            <form id="barangForm">
+    <div id="barangModal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+            class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-orange-500 to-amber-500 px-5 sm:px-6 py-4">
+                <h3 id="modalTitle" class="text-lg font-bold text-white">Tambah Barang</h3>
+                <p class="text-orange-100 text-xs">Lengkapi data barang dengan benar</p>
+            </div>
+            <form id="barangForm" class="p-5 sm:p-6 space-y-4">
                 <input type="hidden" id="barangId">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kode Barang *</label>
-                    <input type="text" id="kodeBarang" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                <div>
+                    <label
+                        class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 sm:mb-2">Kode
+                        Barang *</label>
+                    <input type="text" id="kodeBarang" required
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-orange-400 focus:outline-none bg-gray-50 focus:bg-white transition-all"
+                        placeholder="Contoh: BRG-001">
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Barang *</label>
-                    <input type="text" id="namaBarang" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                <div>
+                    <label
+                        class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 sm:mb-2">Nama
+                        Barang *</label>
+                    <input type="text" id="namaBarang" required
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-orange-400 focus:outline-none bg-gray-50 focus:bg-white transition-all"
+                        placeholder="Contoh: Proyektor Epson">
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Total *</label>
-                    <input type="number" id="jumlahTotal" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label
+                            class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 sm:mb-2">Jumlah
+                            Total *</label>
+                        <input type="number" id="jumlahTotal" required min="0"
+                            class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-orange-400 focus:outline-none bg-gray-50 focus:bg-white transition-all"
+                            placeholder="0">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 sm:mb-2">Ruangan</label>
+                        <select id="ruanganId"
+                            class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-orange-400 focus:outline-none bg-gray-50 focus:bg-white transition-all">
+                            <option value="">Tidak ada</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Ruangan (Opsional)</label>
-                    <select id="ruanganId" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                        <option value="">Tidak ada</option>
-                    </select>
+                <div>
+                    <label
+                        class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 sm:mb-2">Deskripsi</label>
+                    <textarea id="deskripsi" rows="3"
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-orange-400 focus:outline-none bg-gray-50 focus:bg-white transition-all"
+                        placeholder="Deskripsi tambahan tentang barang..."></textarea>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                    <textarea id="deskripsi" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+
+                <div id="errorMessage"
+                    class="text-red-600 text-sm hidden bg-red-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-red-200">
                 </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-200/50 text-sm sm:text-base">
                         Simpan
                     </button>
-                    <button type="button" onclick="closeModal()" class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300">
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 transition-all text-sm sm:text-base">
                         Batal
                     </button>
                 </div>
             </form>
-            <div id="errorMessage" class="mt-4 text-red-600 text-sm hidden"></div>
         </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteModal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+            class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <div class="p-6 sm:p-8 text-center">
+                <div
+                    class="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5">
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-red-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Hapus Barang?</h3>
+                <p class="text-gray-500 text-sm sm:text-base mb-6">Apakah Anda yakin ingin menghapus barang ini?
+                    Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()"
+                        class="flex-1 bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all text-sm sm:text-base">
+                        Batal
+                    </button>
+                    <button id="confirmDeleteBtn"
+                        class="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-2.5 sm:py-3 rounded-xl font-bold hover:from-red-600 hover:to-red-700 transition-all shadow-lg shadow-red-200/50 text-sm sm:text-base">
+                        Ya, Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <div id="toastIcon" class="w-6 h-6 flex items-center justify-center"></div>
+        <span id="toastMessage" class="text-sm font-medium"></span>
     </div>
 
     <script src="assets/js/api.legacy.js"></script>
@@ -111,28 +266,75 @@
         }
 
         async function loadBarang() {
+            const loadingState = document.getElementById('loadingState');
+            const barangContainer = document.getElementById('barangContainer');
+            const emptyState = document.getElementById('emptyState');
+
             try {
                 const data = await apiCall('/barang');
-                const tbody = document.getElementById('barangTable');
-                
+
+                loadingState.classList.add('hidden');
+
                 if (data && data.length > 0) {
-                    tbody.innerHTML = data.map(b => `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${b.kode_barang}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${b.nama_barang}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${b.jumlah_total}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${b.jumlah_tersedia}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <button onclick="editBarang(${b.id})" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                                <button onclick="deleteBarang(${b.id})" class="text-red-600 hover:text-red-800">Hapus</button>
-                            </td>
-                        </tr>
+                    document.getElementById('totalCount').textContent = data.length;
+                    barangContainer.classList.remove('hidden');
+                    emptyState.classList.add('hidden');
+
+                    barangContainer.innerHTML = data.map(b => `
+                        <div class="bg-white border border-gray-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:shadow-lg hover:border-orange-200 transition-all group">
+                            <div class="flex items-start gap-3 sm:gap-4">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 text-orange-600 border border-orange-200 flex items-center justify-center group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white transition-all flex-shrink-0">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <span class="px-2 py-0.5 rounded-md bg-orange-100 text-orange-700 text-[10px] font-bold border border-orange-200">${b.kode_barang}</span>
+                                    <h4 class="font-bold text-gray-900 mt-1.5 sm:mt-2 truncate text-sm sm:text-base">${b.nama_barang}</h4>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                            </svg>
+                                            <span>Total: ${b.jumlah_total}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 text-xs ${b.jumlah_tersedia > 0 ? 'text-green-600' : 'text-red-500'}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span>Tersedia: ${b.jumlah_tersedia}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+                                <button onclick="editBarang('${b.kode_barang}')"
+                                    class="flex-1 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-orange-600 bg-orange-50 rounded-lg sm:rounded-xl hover:bg-orange-100 transition-colors flex items-center justify-center gap-1.5 sm:gap-2">
+                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Edit
+                                </button>
+                                <button onclick="deleteBarang('${b.kode_barang}')"
+                                    class="flex-1 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-red-600 bg-red-50 rounded-lg sm:rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-1.5 sm:gap-2">
+                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
                     `).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data</td></tr>';
+                    barangContainer.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('Error loading barang:', error);
+                loadingState.classList.add('hidden');
+                barangContainer.innerHTML = `<p class="text-red-500 text-center col-span-full py-8">Gagal memuat data: ${error.message}</p>`;
+                barangContainer.classList.remove('hidden');
             }
         }
 
@@ -143,10 +345,10 @@
             document.getElementById('barangModal').classList.remove('hidden');
         }
 
-        async function editBarang(id) {
+        async function editBarang(kodeBarang) {
             try {
-                const data = await apiCall(`/barang/${id}`);
-                document.getElementById('barangId').value = data.id;
+                const data = await apiCall(`/barang/${kodeBarang}`);
+                document.getElementById('barangId').value = data.kode_barang;
                 document.getElementById('kodeBarang').value = data.kode_barang;
                 document.getElementById('namaBarang').value = data.nama_barang;
                 document.getElementById('jumlahTotal').value = data.jumlah_total;
@@ -155,20 +357,54 @@
                 document.getElementById('modalTitle').textContent = 'Edit Barang';
                 document.getElementById('barangModal').classList.remove('hidden');
             } catch (error) {
-                alert('Error loading data: ' + error.message);
+                showToast('Error loading data: ' + error.message, 'error');
             }
         }
 
-        async function deleteBarang(id) {
-            if (!confirm('Yakin ingin menghapus barang ini?')) return;
-            
+        let pendingDeleteKode = null;
+
+        function deleteBarang(kodeBarang) {
+            pendingDeleteKode = kodeBarang;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            pendingDeleteKode = null;
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (!pendingDeleteKode) return;
+
             try {
-                await apiCall(`/barang/${id}`, { method: 'DELETE' });
-                alert('Barang berhasil dihapus');
+                await apiCall(`/barang/${pendingDeleteKode}`, { method: 'DELETE' });
+                closeDeleteModal();
+                showToast('Barang berhasil dihapus!', 'success');
                 loadBarang();
             } catch (error) {
-                alert('Error: ' + error.message);
+                closeDeleteModal();
+                showToast('Error: ' + error.message, 'error');
             }
+        });
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 transition-all duration-300';
+                toastIcon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            } else {
+                toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 transition-all duration-300';
+                toastIcon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            }
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            }, 3000);
         }
 
         function closeModal() {
@@ -179,8 +415,8 @@
 
         document.getElementById('barangForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const id = document.getElementById('barangId').value;
+
+            const existingKode = document.getElementById('barangId').value;
             const payload = {
                 kode_barang: document.getElementById('kodeBarang').value,
                 nama_barang: document.getElementById('namaBarang').value,
@@ -190,8 +426,8 @@
             };
 
             try {
-                if (id) {
-                    await apiCall(`/barang/${id}`, {
+                if (existingKode) {
+                    await apiCall(`/barang/${existingKode}`, {
                         method: 'PUT',
                         body: JSON.stringify(payload)
                     });
@@ -201,8 +437,8 @@
                         body: JSON.stringify(payload)
                     });
                 }
-                
-                alert('Barang berhasil disimpan!');
+
+                showToast('Barang berhasil disimpan!', 'success');
                 closeModal();
                 loadBarang();
             } catch (error) {
@@ -221,4 +457,5 @@
         loadBarang();
     </script>
 </body>
+
 </html>
