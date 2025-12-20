@@ -29,7 +29,7 @@ const fetchSchedules = async () => {
     allSchedules = await response.json();
 
     renderCalendar();
-    
+
     const today = new Date();
     showScheduleForDate(today.getDate(), today.getMonth(), today.getFullYear());
   } catch (error) {
@@ -89,14 +89,14 @@ const renderCalendar = () => {
 const showScheduleForDate = (day, month, year) => {
   const dateKey = formatDateKey(year, month, day);
   const dateObj = new Date(year, month, day);
-    if (selectedDateLabel) {
-        selectedDateLabel.innerText = dateObj.toLocaleDateString('id-ID', {
-            weekday: 'long', 
-            day: 'numeric', 
-            month: 'long',
-            year: 'numeric' // <--- TAMBAHKAN INI
-        });
-    }
+  if (selectedDateLabel) {
+    selectedDateLabel.innerText = dateObj.toLocaleDateString('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric' // <--- TAMBAHKAN INI
+    });
+  }
 
   const dailySchedules = allSchedules.filter((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
 
@@ -194,20 +194,17 @@ const fetchBarang = () => {
     .then((r) => r.json())
     .then((data) => {
       if (!Array.isArray(data) || data.length === 0) {
-        barangBody.innerHTML = '<tr><td colspan="4" class="px-5 py-4 text-center text-gray-400 text-xs">Tidak ada data barang.</td></tr>';
+        barangBody.innerHTML = '<tr><td colspan="3" class="px-5 py-4 text-center text-gray-400 text-xs">Tidak ada data barang.</td></tr>';
         return;
       }
       barangBody.innerHTML = data.map((barang) => `
           <tr class="hover:bg-orange-50/60 transition-colors">
             <td class="px-5 py-3 font-mono text-xs text-gray-500 bg-orange-50/80 border-r w-24">${barang.kode_barang || '-'}</td>
             <td class="px-5 py-3 font-semibold text-gray-800 text-sm">${barang.nama_barang || '-'}</td>
-            <td class="px-5 py-3 text-center text-sm text-gray-600">${barang.jumlah_total ?? '-'}</td>
-            <td class="px-5 py-3 text-center">
-              <span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-[10px] font-bold border border-orange-200">${barang.jumlah_tersedia ?? '-'} Unit</span>
-            </td>
+            <td class="px-5 py-3 text-gray-600 text-sm">${barang.deskripsi || '-'}</td>
           </tr>`).join('');
     })
-    .catch(() => { barangBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500 text-xs">Gagal memuat barang.</td></tr>'; });
+    .catch(() => { barangBody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-red-500 text-xs">Gagal memuat barang.</td></tr>'; });
 };
 
 fetchSchedules();

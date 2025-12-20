@@ -208,13 +208,12 @@
                                 <tr>
                                     <th class="px-6 py-3">Kode</th>
                                     <th class="px-6 py-3">Nama Barang</th>
-                                    <th class="px-6 py-3 text-center">Total</th>
-                                    <th class="px-6 py-3 text-center">Tersedia</th>
+                                    <th class="px-6 py-3">Deskripsi</th>
                                 </tr>
                             </thead>
                             <tbody id="barang-body" class="divide-y divide-gray-100">
                                 <tr>
-                                    <td colspan="4" class="px-6 py-5 text-center text-gray-400 text-sm">Memuat data...
+                                    <td colspan="3" class="px-6 py-5 text-center text-gray-400 text-sm">Memuat data...
                                     </td>
                                 </tr>
                             </tbody>
@@ -492,18 +491,17 @@
                 const data = await apiCall('/barang');
                 const tbody = document.getElementById('barang-body');
                 if (!Array.isArray(data) || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-4 text-center text-gray-400 text-xs">Tidak ada data barang.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" class="px-5 py-4 text-center text-gray-400 text-xs">Tidak ada data barang.</td></tr>';
                     return;
                 }
                 tbody.innerHTML = data.map((b) => `
                     <tr class="hover:bg-orange-50/60 transition-colors">
                         <td class="px-5 py-3 font-mono text-xs text-gray-500 bg-orange-50/80 border-r w-24">${b.kode_barang || '-'}</td>
                         <td class="px-5 py-3 font-semibold text-gray-800 text-sm">${b.nama_barang || '-'}</td>
-                        <td class="px-5 py-3 text-center text-sm text-gray-600">${b.jumlah_total ?? '-'}</td>
-                        <td class="px-5 py-3 text-center"><span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-[10px] font-bold border border-orange-200">${b.jumlah_tersedia ?? '-'} Unit</span></td>
+                        <td class="px-5 py-3 text-gray-600 text-sm">${b.deskripsi || '-'}</td>
                     </tr>`).join('');
             } catch (error) {
-                document.getElementById('barang-body').innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500 text-xs">Gagal memuat barang.</td></tr>';
+                document.getElementById('barang-body').innerHTML = '<tr><td colspan="3" class="text-center py-4 text-red-500 text-xs">Gagal memuat barang.</td></tr>';
             }
         }
 

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Laporan Peminjaman - Sistem Peminjaman Sarpras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-orange-50 text-gray-800 min-h-screen pb-12">
+    <!-- Navbar (Identical to Dashboard) -->
+    <nav class="bg-white/95 backdrop-blur border-b border-orange-100 sticky top-0 z-40 shadow-sm">
+        <div
+            class="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <img src="https://raw.githubusercontent.com/saripudin14/img/refs/heads/main/logo.png" alt="Logo Sarpras"
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl border border-orange-100 shadow-lg shadow-orange-200/70 object-contain bg-white/70 p-1.5 sm:p-2">
+                <div>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-widest text-orange-500 font-semibold">Unit
+                        Sarana & Prasarana
+                    </p>
+                    <h1 class="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Detail Peminjaman</h1>
+                </div>
+            </div>
+            <div class="flex gap-2 sm:gap-3">
+                <a href="laporan-peminjaman.html"
+                    class="w-10 h-10 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl border border-orange-200 flex items-center justify-center text-orange-600 bg-white hover:bg-orange-50 hover:border-orange-300 transition-all shadow-sm"
+                    title="Kembali ke Laporan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">
+
+        <!-- Loading State -->
+        <div id="loadingState"
+            class="bg-white rounded-2xl sm:rounded-3xl p-12 sm:p-16 text-center border border-orange-100 shadow-sm">
+            <div
+                class="w-12 h-12 sm:w-16 sm:h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4 sm:mb-6">
+            </div>
+            <p class="text-gray-500 font-medium text-base sm:text-lg">Mengambil detail peminjaman...</p>
+            <p class="text-gray-400 text-xs sm:text-sm mt-2">Mohon tunggu sebentar</p>
+        </div>
+
+        <!-- Content -->
+        <div id="detailView" class="hidden space-y-6 sm:space-y-8">
+
+            <!-- Hero Section (Dashboard Style) -->
+            <section
+                class="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 text-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+                <div class="absolute inset-0 opacity-20 pointer-events-none"
+                    style="background-image:url('https://www.transparenttextures.com/patterns/topography.png');"></div>
+
+                <div class="relative grid gap-6 md:grid-cols-[2fr,1fr] items-center">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="uppercase text-xs tracking-[0.4em] text-orange-100 font-semibold">Detail
+                                Laporan</span>
+                            <span id="headerId"
+                                class="px-2 py-0.5 rounded bg-white/20 text-white text-[10px] font-mono font-bold tracking-wide border border-white/20">#ID</span>
+                            <span id="headerDate"
+                                class="text-xs text-orange-100 font-medium ml-1 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                -
+                            </span>
+                        </div>
+                        <h2 id="detailRuangan" class="text-3xl md:text-4xl font-bold leading-tight mb-2">-</h2>
+                        <div class="flex flex-wrap items-center gap-6 text-orange-50 text-sm mt-4">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span id="detailPeminjam" class="font-medium">-</span>
+                            </div>
+                            <div class="w-1 h-1 rounded-full bg-orange-200"></div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                    </path>
+                                </svg>
+                                <span id="detailOrganisasi" class="font-medium">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-end justify-center h-full">
+                        <div id="statusBadgeContainer"
+                            class="backdrop-blur-sm bg-white/10 p-2 rounded-2xl border border-white/20">
+                            <!-- Status badge will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                <!-- Left Column (2/3) -->
+                <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+
+                    <!-- Activity Detail Card -->
+                    <div class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-orange-100">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <span class="w-1.5 h-6 bg-orange-500 rounded-full"></span>
+                            Detail Kegiatan
+                        </h3>
+
+                        <div class="space-y-6">
+                            <div class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nama
+                                    Kegiatan</p>
+                                <p id="detailKegiatan" class="text-lg font-semibold text-gray-900 leading-relaxed">-</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div
+                                    class="p-5 bg-orange-50/60 rounded-2xl border border-orange-100 hover:border-orange-200 transition-colors">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div
+                                            class="p-1.5 bg-white rounded-lg text-orange-500 shadow-sm border border-orange-100">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <span
+                                            class="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Mulai</span>
+                                    </div>
+                                    <p id="detailMulaiDate" class="font-bold text-gray-900 text-lg">-</p>
+                                    <p id="detailMulaiTime" class="text-xs sm:text-sm text-gray-500 mt-0.5">-</p>
+                                </div>
+
+                                <div
+                                    class="p-5 bg-orange-50/60 rounded-2xl border border-orange-100 hover:border-orange-200 transition-colors">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div
+                                            class="p-1.5 bg-white rounded-lg text-orange-500 shadow-sm border border-orange-100">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <span
+                                            class="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Selesai</span>
+                                    </div>
+                                    <p id="detailSelesaiDate" class="font-bold text-gray-900 text-lg">-</p>
+                                    <p id="detailSelesaiTime" class="text-xs sm:text-sm text-gray-500 mt-0.5">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items List -->
+                    <div id="itemsSection"
+                        class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-orange-100 hidden">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                            Barang yang Dipinjam
+                        </h3>
+                        <div class="overflow-hidden rounded-2xl border border-gray-100">
+                            <table class="min-w-full divide-y divide-gray-100">
+                                <thead class="bg-gray-50/50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                            Nama Barang</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                            Kategori</th>
+                                        <th
+                                            class="px-6 py-4 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                            Jumlah</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsTableBody" class="bg-white divide-y divide-gray-100">
+                                    <!-- Items injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column (1/3) -->
+                <div class="space-y-6">
+
+                    <!-- Documents Card -->
+                    <div class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-orange-100">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Dokumen</h3>
+                        <div id="documentContainer">
+                            <!-- Document content injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Verification Status Card -->
+                    <div class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-orange-100">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Status Verifikasi</h3>
+
+                        <div class="relative pl-4 border-l-2 border-dashed border-gray-200 space-y-8 my-4">
+                            <!-- Step 1: Submission -->
+                            <div class="relative">
+                                <div
+                                    class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-green-500 ring-4 ring-white shadow-sm">
+                                </div>
+                                <p class="text-[10px] text-gray-400 font-mono mb-1" id="timelineCreatedDate">-</p>
+                                <p class="text-sm font-semibold text-gray-900">Pengajuan Dibuat</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Menunggu review admin</p>
+                            </div>
+
+                            <!-- Step 2: Verification -->
+                            <div class="relative">
+                                <div id="timelineDot2"
+                                    class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-gray-200 ring-4 ring-white shadow-sm">
+                                </div>
+                                <div id="timelineContent2">
+                                    <p class="text-sm font-medium text-gray-400">Proses Verifikasi</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Belum diproses</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Verification Note -->
+                        <div id="verificationNote" class="mt-6 pt-6 border-t border-dashed border-gray-200 hidden">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Catatan Admin
+                            </p>
+                            <div
+                                class="p-4 bg-orange-50 rounded-xl border border-orange-100 text-sm text-gray-700 italic relative">
+                                <svg class="w-5 h-5 text-orange-400 mb-1 absolute -top-2.5 -left-2 bg-white rounded-full border border-orange-50"
+                                    fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                "<span id="verificationNoteText">-</span>"
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/api.legacy.js"></script>
+    <script>
+        checkAuth();
+
+        // Elements
+        const loadingState = document.getElementById('loadingState');
+        const detailView = document.getElementById('detailView');
+
+        // URL Params
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentId = urlParams.get('id');
+
+        // Main Init
+        if (currentId) {
+            initDetailView(currentId);
+        } else {
+            showErrorState('ID Peminjaman tidak ditemukan');
+        }
+
+        async function initDetailView(id) {
+            try {
+                const data = await apiCall(`/peminjaman/${id}`);
+
+                // Header Info
+                document.getElementById('headerId').textContent = `#${data.kode_peminjaman || id}`;
+                document.getElementById('headerDate').innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ${new Date(data.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                `;
+
+                document.getElementById('detailRuangan').textContent = data.ruangan ? data.ruangan.nama_ruangan : 'Peminjaman Barang';
+                document.getElementById('detailPeminjam').textContent = data.peminjam ? data.peminjam.nama : 'N/A';
+                document.getElementById('detailOrganisasi').textContent = data.peminjam?.organisasi?.nama_organisasi || '-';
+
+                // Status Badge
+                renderStatusBadge(data.status);
+
+                // Activity Details
+                document.getElementById('detailKegiatan').textContent = data.kegiatan?.nama_kegiatan || '-';
+
+                const startDate = new Date(data.tanggal_mulai);
+                const endDate = new Date(data.tanggal_selesai);
+
+                document.getElementById('detailMulaiDate').textContent = startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                document.getElementById('detailMulaiTime').textContent = startDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+
+                document.getElementById('detailSelesaiDate').textContent = endDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                document.getElementById('detailSelesaiTime').textContent = endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+
+                // Items List
+                if (data.barang && data.barang.length > 0) {
+                    document.getElementById('itemsSection').classList.remove('hidden');
+                    document.getElementById('itemsTableBody').innerHTML = data.barang.map(b => `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${b.barang.nama_barang}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Barang</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-bold">${b.jumlah}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Documents
+                renderDocumentSection(data);
+
+                // Timeline & Verification Logic
+                updateTimeline(data);
+
+                // Show Content
+                loadingState.classList.add('hidden');
+                detailView.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                showErrorState(error.message);
+            }
+        }
+
+        function renderStatusBadge(status) {
+            const container = document.getElementById('statusBadgeContainer');
+            let classes = '';
+            let label = status;
+            let icon = '';
+
+            if (status === 'PENDING') {
+                classes = 'bg-yellow-100 text-yellow-700 border-yellow-200';
+                label = 'Menunggu Verifikasi';
+                icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            } else if (status === 'APPROVED') {
+                classes = 'bg-green-100 text-green-700 border-green-200';
+                label = 'Disetujui';
+                icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            } else if (status === 'REJECTED') {
+                classes = 'bg-red-100 text-red-700 border-red-200';
+                label = 'Ditolak';
+                icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            } else {
+                classes = 'bg-blue-100 text-blue-700 border-blue-200';
+                label = 'Selesai';
+                icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+
+            container.innerHTML = `
+                <div class="inline-flex items-center px-4 py-2 rounded-full border ${classes} shadow-sm backdrop-blur-sm">
+                    ${icon}
+                    <span class="text-sm font-bold uppercase tracking-wide">${label}</span>
+                </div>
+            `;
+        }
+
+        async function renderDocumentSection(data) {
+            const container = document.getElementById('documentContainer');
+
+            if (!data.path_surat_digital) {
+                container.innerHTML = `
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-center">
+                        <p class="text-sm text-gray-500 italic">Tidak ada dokumen dilampirkan</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const suratData = await apiCall(`/peminjaman/${data.kode_peminjaman || data.id}/surat`); // Handle both ID formats
+                if (suratData && suratData.signed_url) {
+                    container.innerHTML = `
+                        <a href="${suratData.signed_url}" target="_blank" class="flex items-center gap-4 p-4 bg-orange-50/50 hover:bg-orange-100 rounded-2xl border border-orange-100 hover:border-orange-200 transition-all group">
+                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-red-500 shadow-sm border border-red-50 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-900 text-sm">Surat Peminjaman</p>
+                                <p class="text-xs text-gray-500 group-hover:text-orange-600 transition-colors">Klik untuk melihat PDF</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-orange-500 -translate-x-2 group-hover:translate-x-0 opacity-0 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    `;
+                } else {
+                    throw new Error("No URL");
+                }
+            } catch (e) {
+                container.innerHTML = `
+                    <div class="p-4 bg-red-50 rounded-2xl border border-red-100">
+                        <p class="text-sm text-red-600 text-center">Gagal memuat dokumen</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateTimeline(data) {
+            document.getElementById('timelineCreatedDate').textContent = new Date(data.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+            const dot2 = document.getElementById('timelineDot2');
+            const content2 = document.getElementById('timelineContent2');
+            const noteSection = document.getElementById('verificationNote');
+
+            if (data.status === 'PENDING') {
+                // Default state is fine
+            } else {
+                // Verified State
+                let colorClass = data.status === 'APPROVED' ? 'bg-green-500' : 'bg-red-500';
+                if (data.status === 'FINISHED') colorClass = 'bg-blue-500';
+
+                dot2.className = `absolute -left-[21px] top-1 w-3 h-3 rounded-full ${colorClass} border-2 border-white shadow-sm`;
+
+                let statusText = 'Verifikasi Selesai';
+                let subText = `Oleh ${data.verified_by || 'Admin'} pada ${new Date(data.verified_at).toLocaleString('id-ID')}`;
+
+                content2.innerHTML = `
+                    <p class="text-sm font-bold text-gray-900">${statusText}</p>
+                    <p class="text-xs text-gray-500">${subText}</p>
+                `;
+
+                if (data.catatan_verifikasi) {
+                    noteSection.classList.remove('hidden');
+                    document.getElementById('verificationNoteText').textContent = data.catatan_verifikasi;
+                }
+            }
+        }
+
+        function showErrorState(message) {
+            loadingState.innerHTML = `
+                <div class="text-center p-8 bg-red-50 rounded-3xl border border-red-100 max-w-lg mx-auto">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 shadow-sm">
+                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-red-700 mb-2">Terjadi Kesalahan</h3>
+                    <p class="text-red-600 mb-6 text-sm">${message}</p>
+                    <a href="laporan-peminjaman.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all">
+                        Kembali ke Laporan
+                    </a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
