@@ -223,109 +223,84 @@
 
                 if (data && data.length > 0) {
                     totalCount.textContent = `${data.length} pengajuan`;
-                    container.innerHTML = data.map(p => {
-                        const statusColor = getStatusBadgeColor(p.status);
-                        const borderColor = getStatusBorderColor(p.status);
 
+                    // Grid Layout
+                    container.className = 'grid md:grid-cols-2 gap-6';
+
+                    container.innerHTML = data.map(p => {
                         // Determine loan type based on available data
                         const hasRuangan = !!p.ruangan;
                         const hasBarang = p.barang && p.barang.length > 0;
 
-                        // Set title based on loan type combination
-                        let title, subtitle;
-                        if (hasRuangan && hasBarang) {
-                            title = 'Peminjaman Ruangan & Barang';
-                            subtitle = p.ruangan.nama_ruangan;
-                        } else if (hasRuangan) {
-                            title = 'Peminjaman Ruangan';
-                            subtitle = p.ruangan.nama_ruangan;
-                        } else {
-                            title = 'Peminjaman Barang';
-                            subtitle = 'Inventaris Kampus';
-                        }
+                        // Status-based theme colors
+                        const statusTheme = {
+                            'PENDING': { bg: 'bg-yellow-100 text-yellow-600', badge: 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20', deco: 'bg-yellow-50' },
+                            'APPROVED': { bg: 'bg-green-100 text-green-600', badge: 'bg-green-50 text-green-600 border-green-200', deco: 'bg-green-50' },
+                            'REJECTED': { bg: 'bg-red-100 text-red-600', badge: 'bg-red-50 text-red-600 border-red-200', deco: 'bg-red-50' },
+                            'FINISHED': { bg: 'bg-blue-100 text-blue-600', badge: 'bg-blue-50 text-blue-600 border-blue-200', deco: 'bg-blue-50' }
+                        };
+                        const theme = statusTheme[p.status] || { bg: 'bg-gray-100 text-gray-600', badge: 'bg-gray-50 text-gray-600 border-gray-200', deco: 'bg-gray-50' };
 
-                        // Icon: use room icon if has ruangan, otherwise use box/barang icon
+                        // Set title based on loan type combination
+                        let title = hasRuangan ? p.ruangan.nama_ruangan : 'Peminjaman Barang';
+                        const subtitle = p.kegiatan?.nama_kegiatan || 'Tidak ada detail kegiatan';
+
+                        // Icon based on type
                         const icon = hasRuangan ?
-                            `<svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>` :
-                            `<svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>`;
+                            `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>` :
+                            `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>`;
 
                         return `
-                        <div class="bg-white rounded-3xl shadow-sm border-l-4 ${borderColor} border-r border-t border-b border-orange-100 p-6 hover:shadow-md transition group">
-                            <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                                <div class="flex items-start gap-4 flex-1">
-                                    <div class="p-3 bg-orange-50 rounded-2xl border border-orange-100 group-hover:bg-orange-100 transition-colors">
-                                        ${icon}
-                                    </div>
-                                    <div class="space-y-3 flex-1">
-                                        <div>
-                                            <div class="flex flex-wrap items-center gap-3 mb-1">
-                                                <h3 class="text-lg font-bold text-gray-900">${title}</h3>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusColor} border">
-                                                    ${p.status}
-                                                </span>
-                                            </div>
-                                            <p class="text-sm font-medium text-gray-600">${subtitle}</p>
-                                        </div>
-                                        
-                                        <div class="space-y-2 text-sm border-t border-dashed border-gray-100 pt-3">
-                                            <div class="flex items-start gap-2.5">
-                                                <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                <span class="text-gray-600 font-medium">${formatDateRange(p.tanggal_mulai, p.tanggal_selesai)}</span>
-                                            </div>
-                                            
-                                            <div class="flex items-start gap-2.5">
-                                                <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                </svg>
-                                                <span class="text-gray-600"><span class="text-gray-400">Kegiatan:</span> ${p.kegiatan?.nama_kegiatan || 'Tidak ada kegiatan'}</span>
-                                            </div>
-                                            
-                                            ${p.barang && p.barang.length > 0 ? `
-                                                <div class="flex items-start gap-2.5">
-                                                    <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                                    </svg>
-                                                    <div class="text-gray-600">
-                                                        <span class="text-gray-400">Barang:</span> ${p.barang.map(b => `${b.barang.nama_barang} (${b.jumlah})`).join(', ')}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            ${p.catatan_verifikasi ? `
-                                                <div class="bg-red-50 border border-red-100 rounded-xl p-3 mt-2 flex gap-3">
-                                                    <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    <div>
-                                                        <p class="text-xs font-bold text-red-600 uppercase tracking-wider mb-0.5">Catatan Admin</p>
-                                                        <p class="text-sm text-gray-700">${p.catatan_verifikasi}</p>
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    </div>
+                        <div class="bg-white rounded-3xl p-6 border-2 border-gray-100 hover:border-orange-200 transition-all hover:shadow-lg group flex flex-col h-full relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 ${theme.deco} rounded-bl-[4rem] -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                            
+                            <div class="relative z-10 mb-4 flex items-start justify-between">
+                                <div class="w-12 h-12 ${theme.bg} rounded-2xl flex items-center justify-center">
+                                    ${icon}
                                 </div>
-                                
-                                <div class="flex flex-col gap-3 md:items-end md:min-w-[140px]">
-                                    ${p.path_surat_digital ? `
-                                        <button type="button"
-                                            onclick="openSurat('${p.kode_peminjaman}')"
-                                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-orange-200 text-orange-700 bg-orange-50 text-sm font-semibold hover:bg-orange-100 hover:border-orange-300 transition shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                            </svg>
-                                            Lihat Surat
-                                        </button>
-                                    ` : `
-                                        <div class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 text-center">
-                                            <span class="text-xs text-gray-400 font-medium italic">Surat belum diupload</span>
-                                        </div>
-                                    `}
-                                </div>
+                                <span class="px-3 py-1 ${theme.badge} text-xs font-bold rounded-full border">${p.status}</span>
                             </div>
+
+                            <div class="relative z-10 space-y-2 mb-4 flex-1">
+                                <h3 class="text-xl font-bold text-gray-900 group-hover:text-gray-800">${title}</h3>
+                                <p class="text-sm text-gray-500 line-clamp-2">${subtitle}</p>
+                                
+                                <div class="pt-2 flex flex-wrap gap-2">
+                                    <span class="inline-flex items-center text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        ${formatDateRange(p.tanggal_mulai, p.tanggal_selesai)}
+                                    </span>
+                                    ${hasBarang ? `
+                                    <span class="inline-flex items-center text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                        ${p.barang.length} barang
+                                    </span>
+                                    ` : ''}
+                                </div>
+
+                                ${p.catatan_verifikasi ? `
+                                <div class="bg-red-50 border border-red-100 rounded-xl p-3 mt-3 flex gap-2">
+                                    <svg class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div>
+                                        <p class="text-[10px] font-bold text-red-600 uppercase tracking-wider mb-0.5">Catatan Admin</p>
+                                        <p class="text-xs text-gray-700">${p.catatan_verifikasi}</p>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            ${p.path_surat_digital ? `
+                            <button type="button" onclick="openSurat('${p.kode_peminjaman}')" class="relative z-10 w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm bg-orange-500 text-white hover:bg-orange-600 transition-all shadow-lg shadow-orange-200/50 hover:shadow-orange-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Lihat Surat
+                            </button>
+                            ` : `
+                            <div class="relative z-10 w-full py-3 rounded-xl bg-gray-50 border border-gray-100 text-center">
+                                <span class="text-xs text-gray-400 font-medium italic">Surat belum tersedia</span>
+                            </div>
+                            `}
                         </div>
-                    `;
+                        `;
                     }).join('');
                 } else {
                     totalCount.textContent = '0 pengajuan';
