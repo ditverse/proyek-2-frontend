@@ -110,10 +110,16 @@
                 </span>
             </div>
 
-            <div id="peminjamanList" class="space-y-4">
-                <div class="bg-white rounded-3xl shadow-sm border border-orange-100 p-6">
-                    <p class="text-gray-400 text-sm text-center py-8">Memuat data...</p>
+            <!-- Loading State -->
+            <div id="loadingState" class="bg-white rounded-3xl p-16 text-center border border-orange-100 shadow-sm">
+                <div
+                    class="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-6">
                 </div>
+                <p class="text-gray-500 font-medium text-lg">Mengambil data dari sistem...</p>
+                <p class="text-gray-400 text-sm mt-2">Mohon tunggu sebentar</p>
+            </div>
+
+            <div id="peminjamanList" class="hidden space-y-4">
             </div>
         </section>
     </main>
@@ -180,10 +186,40 @@
         }
 
         async function loadPeminjaman() {
+            const loadingState = document.getElementById('loadingState');
+            const container = document.getElementById('peminjamanList');
+            const totalCount = document.getElementById('totalCount');
+
+            // Show loading, hide list
+            loadingState.classList.remove('hidden');
+            container.classList.add('hidden');
+
             try {
-                const data = await apiCall('/peminjaman/me');
-                const container = document.getElementById('peminjamanList');
-                const totalCount = document.getElementById('totalCount');
+                const allData = await apiCall('/peminjaman/me');
+
+                // Get filter values
+                const startFilterVal = document.getElementById('startDate').value;
+                const endFilterVal = document.getElementById('endDate').value;
+
+                // Apply client-side filtering based on date range
+                let data = allData;
+                if (startFilterVal && endFilterVal) {
+                    const startFilter = new Date(startFilterVal);
+                    startFilter.setHours(0, 0, 0, 0);
+
+                    const endFilter = new Date(endFilterVal);
+                    endFilter.setHours(23, 59, 59, 999);
+
+                    data = allData.filter(p => {
+                        // Filter based on tanggal_mulai (loan start date)
+                        const tanggalMulai = new Date(p.tanggal_mulai);
+                        return tanggalMulai >= startFilter && tanggalMulai <= endFilter;
+                    });
+                }
+
+                // Hide loading, show list
+                loadingState.classList.add('hidden');
+                container.classList.remove('hidden');
 
                 if (data && data.length > 0) {
                     totalCount.textContent = `${data.length} pengajuan`;
@@ -298,8 +334,8 @@
                             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <p class="text-gray-500 text-lg font-medium mb-2">Belum ada riwayat peminjaman</p>
-                            <p class="text-gray-400 text-sm mb-6">Mulai dengan mengajukan peminjaman ruangan atau barang.</p>
+                            <p class="text-gray-500 text-lg font-medium mb-2">Tidak ada peminjaman dalam rentang tanggal ini</p>
+                            <p class="text-gray-400 text-sm mb-6">Coba ubah filter tanggal atau ajukan peminjaman baru.</p>
                             <a href="pengajuan-peminjaman.html" class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-2xl font-semibold hover:bg-orange-600 transition shadow-lg shadow-orange-200/60">
                                 Ajukan Peminjaman
                             </a>
@@ -308,7 +344,11 @@
                 }
             } catch (error) {
                 console.error('Error loading peminjaman:', error);
-                document.getElementById('peminjamanList').innerHTML = `
+                const loadingState = document.getElementById('loadingState');
+                const container = document.getElementById('peminjamanList');
+                loadingState.classList.add('hidden');
+                container.classList.remove('hidden');
+                container.innerHTML = `
                     <div class="bg-white rounded-3xl shadow-sm border border-red-100 p-6">
                         <p class="text-red-600 text-sm text-center">Error memuat data. Silakan refresh halaman.</p>
                     </div>

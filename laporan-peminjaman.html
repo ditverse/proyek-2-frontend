@@ -298,8 +298,16 @@
             errorState.classList.add('hidden');
 
             try {
-                const startISO = new Date(start).toISOString();
-                const endISO = new Date(end).toISOString();
+                // Fix timezone issue: construct dates with local timezone offset
+                // Start date: beginning of day in local timezone
+                const startDate = new Date(start);
+                startDate.setHours(0, 0, 0, 0);
+                const startISO = startDate.toISOString();
+
+                // End date: end of day in local timezone (23:59:59.999)
+                const endDate = new Date(end);
+                endDate.setHours(23, 59, 59, 999);
+                const endISO = endDate.toISOString();
 
                 // Build URL with status filter
                 let url = `/laporan/peminjaman?start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
@@ -443,17 +451,21 @@
                 }
 
                 // Get filter values
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+                const startDateVal = document.getElementById('startDate').value;
+                const endDateVal = document.getElementById('endDate').value;
                 const status = document.getElementById('statusFilter').value;
 
-                // Build query params
+                // Build query params with proper timezone handling
                 const params = new URLSearchParams();
-                if (startDate) {
-                    params.append('start', new Date(startDate).toISOString());
+                if (startDateVal) {
+                    const startDate = new Date(startDateVal);
+                    startDate.setHours(0, 0, 0, 0);
+                    params.append('start', startDate.toISOString());
                 }
-                if (endDate) {
-                    params.append('end', new Date(endDate).toISOString());
+                if (endDateVal) {
+                    const endDate = new Date(endDateVal);
+                    endDate.setHours(23, 59, 59, 999);
+                    params.append('end', endDate.toISOString());
                 }
                 if (status && status !== '') {
                     params.append('status', status);
