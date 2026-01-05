@@ -140,16 +140,54 @@
             </div>
 
             <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-orange-100 flex flex-col gap-2">
-                    <p class="text-xs uppercase tracking-widest text-orange-500 font-semibold">Jadwal Harian</p>
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-semibold text-gray-900">Agenda Tanggal Terpilih</h3>
-                        <span id="selected-date-label"
-                            class="inline-flex flex-col items-center justify-center text-sm font-semibold text-orange-600 bg-orange-50 px-4 py-1.5 rounded-full border border-orange-100 text-center leading-tight min-w-[140px]">Hari
-                            Ini</span>
+                <div class="p-6 border-b border-orange-100 flex flex-col gap-4">
+                    <!-- Header Title -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] uppercase tracking-widest text-orange-500 font-bold">Jadwal Harian</p>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 leading-tight">Agenda Kegiatan & Peminjaman</h3>
+                        <p class="text-xs text-gray-500 mt-1">Klik tanggal pada kalender untuk melihat detail agenda.
+                        </p>
                     </div>
-                    <p class="text-xs text-gray-500">Klik tanggal pada kalender untuk menampilkan detail kegiatan pada
-                        ruangan.</p>
+
+                    <!-- Action Bar -->
+                    <div class="flex items-center gap-3">
+                        <!-- Date Display -->
+                        <div
+                            class="flex-1 bg-orange-50/40 border border-orange-100 rounded-2xl p-2.5 flex items-center gap-3 min-w-0">
+                            <div
+                                class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 flex-shrink-0 shadow-inner">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-[9px] text-orange-400 font-bold uppercase tracking-wider">Tanggal
+                                    Terpilih</span>
+                                <span id="selected-date-label" class="text-xs font-bold text-gray-900 truncate">Hari
+                                    Ini</span>
+                            </div>
+                        </div>
+
+                        <!-- Availability Button -->
+                        <button onclick="showAvailableRooms()"
+                            class="flex-shrink-0 bg-white border border-gray-100 text-gray-600 shadow-sm hover:shadow-md hover:border-orange-200 hover:text-orange-600 px-4 py-2 rounded-2xl flex items-center gap-2 transition-all active:scale-95 group">
+                            <div class="text-left leading-none">
+                                <span
+                                    class="block text-[9px] font-bold text-gray-400 group-hover:text-orange-400 uppercase tracking-wider">Cek</span>
+                                <span class="block text-xs font-bold">Ruangan</span>
+                            </div>
+                            <svg class="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="jadwal-list-container" class="p-4 space-y-3 flex-1 overflow-y-auto" style="max-height: 280px;">
                     <p class="text-center text-gray-400 text-sm py-8 italic">Pilih tanggal di atas untuk melihat detail.
@@ -256,6 +294,194 @@
             </div>
         </section>
     </main>
+
+    <!-- Modal Ruangan Tersedia -->
+    <div id="modalAvailableRooms" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"
+            onclick="closeAvailableRooms()"></div>
+
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div
+                    class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl border border-orange-100">
+
+                    <!-- Header -->
+                    <div class="bg-orange-50 px-6 py-4 flex items-center justify-between border-b border-orange-100">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900" id="modal-title">Ketersediaan Ruangan</h3>
+                            <p id="modal-date-label" class="text-sm text-orange-600 font-medium">Memuat tanggal...</p>
+                        </div>
+                        <button type="button" onclick="closeAvailableRooms()"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <span class="sr-only">Close</span>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="bg-white px-6 py-3 border-b border-gray-100 flex gap-4 text-xs font-semibold">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span> Disetujui (Oren)
+                            <!-- User asked for Approved=Oren, Available=Green, Booked=Abu... Wait, previous context said: "3 kategori Tersedia (hijau), Booked (abu), Disetujui (oren)." -->
+                            <!-- Re-reading request: "3 kategori Tersedia (hijau), Booked (abu), Disetujui (oren)." -->
+                            <span class="text-gray-600">Tersedia (Hijau)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                            <span class="text-gray-600">Disetujui (Oren)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                            <span class="text-gray-600">Booked (Abu)</span>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="px-6 py-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                        <div id="available-rooms-list" class="grid gap-4 md:grid-cols-2">
+                            <!-- Rooms will be injected here -->
+                            <div class="col-span-2 text-center py-8 text-gray-500">Memuat data ruangan...</div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="bg-gray-50 px-6 py-3 sm:flex sm:flex-row-reverse">
+                        <button type="button" onclick="closeAvailableRooms()"
+                            class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts for Modal -->
+    <script>
+        function openAvailableRooms() {
+            document.getElementById('modalAvailableRooms').classList.remove('hidden');
+        }
+
+        function closeAvailableRooms() {
+            document.getElementById('modalAvailableRooms').classList.add('hidden');
+        }
+
+        async function showAvailableRooms() {
+            openAvailableRooms();
+            const listContainer = document.getElementById('available-rooms-list');
+            const dateLabel = document.getElementById('modal-date-label');
+
+            // Get selected date from global state (simulating selection from calendar)
+            // Note: current logic uses `currentDate` (month view) but `showScheduleForDate` updates `selectedDateLabel`.
+            // We need the specific selected DAY.
+            // Let's assume the user clicked a day on calendar, but we don't store the exact "selected day" in a global var yet.
+            // Wait, `showScheduleForDate` uses specific day. We should store it.
+            // I'll update `showScheduleForDate` to store `selectedDay`, `selectedMonth`, `selectedYear`.
+            // For now, let's default to today or infer from UI is risky.
+            // Better approach: Modify `showScheduleForDate` to update a global `currentlySelectedDate`.
+
+            let dateToUse = window.currentlySelectedDate || new Date();
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateLabel.textContent = dateToUse.toLocaleDateString('id-ID', options);
+
+            listContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-500">Memuat data...</div>';
+
+            try {
+                // Fetch all rooms
+                const rooms = await apiCall('/ruangan');
+
+                // Get schedules for this date
+                // Check `allSchedules` which is loaded by `fetchSchedules`. 
+                // It contains approved for everyone AND pending for me.
+
+                const year = dateToUse.getFullYear();
+                const month = dateToUse.getMonth();
+                const day = dateToUse.getDate();
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                const schedulesForDate = allSchedules.filter(s => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+
+                listContainer.innerHTML = rooms.map(room => {
+                    // Filter schedules for this room
+                    const roomSchedules = schedulesForDate.filter(s => s.kode_ruangan === room.kode_ruangan);
+
+                    // Sort by time
+                    roomSchedules.sort((a, b) => a.tanggal_mulai.localeCompare(b.tanggal_mulai));
+
+                    let contentHtml = '';
+
+                    if (roomSchedules.length === 0) {
+                        contentHtml = `
+                            <div class="px-3 py-2 rounded-lg bg-green-50 border border-green-100 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                <span class="text-xs font-semibold text-green-700">Sepenuhnya Tersedia</span>
+                            </div>
+                        `;
+                    } else {
+                        contentHtml = roomSchedules.map(sch => {
+                            const startTime = formatTime(sch.tanggal_mulai);
+                            const endTime = formatTime(sch.tanggal_selesai);
+                            const isPending = sch.is_pending;
+
+                            // Colors based on status
+                            // Tersedia (Hijau) - Logic: gaps between schedules? 
+                            // The prompt asks to "Tampilkan semua ruangan dan informasi peminjaman dengan 3 kategori"
+                            // If a slot is booked, show booked. "Tersedia" usually refers to the room itself being *generally* available?
+                            // Or should we list vacant slots? A simple list of bookings is easier.
+                            // If no bookings -> "Tersedia". 
+                            // If bookings -> List them with status.
+
+                            let statusClass, statusText, dotClass;
+                            if (isPending) {
+                                statusClass = "bg-gray-100 border-gray-200 text-gray-700";
+                                dotClass = "bg-gray-400";
+                                statusText = "Booked (Pending)"; // User (Abu)
+                            } else {
+                                statusClass = "bg-orange-50 border-orange-100 text-orange-700";
+                                dotClass = "bg-orange-500";
+                                statusText = "Disetujui"; // User (Oren)
+                            }
+
+                            return `
+                                <div class="px-3 py-2 rounded-lg border ${statusClass} flex justify-between items-center mb-1 last:mb-0">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full ${dotClass}"></div>
+                                        <span class="text-xs font-medium">${startTime} - ${endTime}</span>
+                                    </div>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider">${statusText}</span>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    return `
+                        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-bold text-gray-900">${room.nama_ruangan}</h4>
+                                    <p class="text-xs text-gray-500">${room.lokasi} • Kapasitas ${room.kapasitas} Org</p>
+                                </div>
+                                <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                ${contentHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error("Error loading available rooms:", error);
+                listContainer.innerHTML = '<div class="col-span-2 text-center text-red-500">Gagal memuat data ruangan.</div>';
+            }
+        }
+    </script>
 
     <script src="assets/js/api.legacy.js"></script>
     <script>
@@ -487,6 +713,7 @@
         const monthYearLabel = document.getElementById('month-year-label');
         const jadwalContainer = document.getElementById('jadwal-list-container');
         const selectedDateLabel = document.getElementById('selected-date-label');
+        window.currentlySelectedDate = new Date();
 
         const formatDateKey = (year, month, day) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
@@ -509,7 +736,7 @@
                             tanggal_mulai: p.tanggal_mulai,
                             tanggal_selesai: p.tanggal_selesai,
                             status: p.status,
-                            peminjam: 'Anda (Menunggu Persetujuan)',
+                            peminjam: user?.nama || 'Anda',
                             organisasi: user?.organisasi_kode || user?.organisasi || '-',
                             kegiatan: p.kegiatan,
                             is_pending: true // Flag untuk styling berbeda
@@ -586,6 +813,7 @@
         }
 
         function showScheduleForDate(day, month, year) {
+            window.currentlySelectedDate = new Date(year, month, day);
             const dateKey = formatDateKey(year, month, day);
             const dateObj = new Date(year, month, day);
             if (selectedDateLabel) {
