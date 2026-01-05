@@ -179,10 +179,42 @@
         });
 
         function formatDateRange(start, end) {
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return `${startDate.toLocaleDateString('id-ID', options)} - ${endDate.toLocaleDateString('id-ID', options)}`;
+            // Helper function to parse ISO date string without timezone conversion
+            // This ensures "2026-01-30T07:00:00Z" is displayed as "30 Januari 2026 07:00"
+            // even though the "Z" suffix implies UTC
+            function parseAsLocalTime(isoString) {
+                if (!isoString) return null;
+                // Remove "Z" suffix and parse as local time
+                const localStr = isoString.replace('Z', '');
+                const [datePart, timePart] = localStr.split('T');
+                const [year, month, day] = datePart.split('-').map(Number);
+                let hours = 0, minutes = 0;
+                if (timePart) {
+                    const timeOnly = timePart.split(/[+-]/)[0]; // Remove timezone offset if any
+                    [hours, minutes] = timeOnly.split(':').map(Number);
+                }
+                return new Date(year, month - 1, day, hours, minutes);
+            }
+
+            const startDate = parseAsLocalTime(start);
+            const endDate = parseAsLocalTime(end);
+
+            if (!startDate || !endDate) return '-';
+
+            const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+
+            const startDateStr = startDate.toLocaleDateString('id-ID', dateOptions);
+            const startTimeStr = startDate.toLocaleTimeString('id-ID', timeOptions);
+            const endDateStr = endDate.toLocaleDateString('id-ID', dateOptions);
+            const endTimeStr = endDate.toLocaleTimeString('id-ID', timeOptions);
+
+            // If same day, show compact format
+            if (startDate.toDateString() === endDate.toDateString()) {
+                return `${startDateStr} pukul ${startTimeStr} - ${endTimeStr}`;
+            }
+
+            return `${startDateStr} pukul ${startTimeStr} - ${endDateStr} pukul ${endTimeStr}`;
         }
 
         async function loadPeminjaman() {

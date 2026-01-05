@@ -70,14 +70,21 @@
         </section>
 
         <section class="grid gap-6 lg:grid-cols-3">
-            <a href="pengajuan-peminjaman.html"
-                class="bg-white border border-orange-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition flex flex-col gap-3">
+            <div id="cardAjukanPeminjaman"
+                class="bg-white border border-orange-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition flex flex-col gap-3 cursor-pointer">
                 <span
                     class="inline-flex w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 items-center justify-center font-semibold">1</span>
                 <h3 class="text-lg font-semibold text-gray-900">Ajukan Peminjaman</h3>
                 <p class="text-sm text-gray-500">Buat permintaan ruangan atau barang secara online.</p>
-                <span class="text-sm font-semibold text-orange-600 mt-auto">Mulai pengajuan →</span>
-            </a>
+                <p id="workingHoursInfo" class="text-xs text-orange-600 hidden">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Jam kerja: Senin-Jumat, 07:00-17:00
+                </p>
+                <span id="cardAjukanLink" class="text-sm font-semibold text-orange-600 mt-auto">Mulai pengajuan →</span>
+            </div>
             <a href="jadwal-ruangan.html"
                 class="bg-white border border-orange-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition flex flex-col gap-3">
                 <span
@@ -260,6 +267,57 @@
             document.getElementById('userName').textContent = user.nama;
         }
 
+        // --- VALIDASI JAM KERJA ---
+        // Jam kerja: Senin-Jumat 07:00-17:00
+        function isWorkingHours() {
+            const now = new Date();
+            const day = now.getDay(); // 0 = Minggu, 1-5 = Senin-Jumat, 6 = Sabtu
+            const hour = now.getHours();
+
+            // Cek apakah hari kerja (Senin = 1 sampai Jumat = 5)
+            const isWeekday = day >= 1 && day <= 5;
+            // Cek apakah dalam jam kerja (07:00 - 17:00)
+            const isWorkTime = hour >= 7 && hour < 17;
+
+            return isWeekday && isWorkTime;
+        }
+
+        // Fungsi untuk setup card Ajukan Peminjaman
+        function setupAjukanPeminjamanCard() {
+            const card = document.getElementById('cardAjukanPeminjaman');
+            const info = document.getElementById('workingHoursInfo');
+            const linkText = document.getElementById('cardAjukanLink');
+
+            if (!card) return;
+
+            if (isWorkingHours()) {
+                // Dalam jam kerja - card aktif
+                card.onclick = () => window.location.href = 'pengajuan-peminjaman.html';
+                card.classList.remove('opacity-60', 'cursor-not-allowed', 'grayscale');
+                card.classList.add('hover:shadow-md', 'cursor-pointer');
+                info.classList.add('hidden');
+                linkText.textContent = 'Mulai pengajuan →';
+            } else {
+                // Di luar jam kerja - card disabled (grey)
+                card.onclick = (e) => {
+                    e.preventDefault();
+                    alert('Pengajuan peminjaman hanya dapat dilakukan pada jam kerja:\nSenin - Jumat, pukul 07:00 - 17:00 WIB');
+                };
+                card.classList.add('opacity-60', 'cursor-not-allowed', 'grayscale');
+                card.classList.remove('hover:shadow-md');
+                info.classList.remove('hidden');
+                linkText.textContent = 'Tidak tersedia saat ini';
+                linkText.classList.remove('text-orange-600');
+                linkText.classList.add('text-gray-400');
+            }
+        }
+
+        // Panggil saat halaman dimuat
+        setupAjukanPeminjamanCard();
+
+        // Update setiap menit untuk mengecek perubahan jam
+        setInterval(setupAjukanPeminjamanCard, 60000);
+
         async function loadPeminjaman() {
             try {
                 const data = await apiCall('/peminjaman/me');
@@ -371,19 +429,49 @@
             return colors[status] || 'border-gray-400';
         }
 
-        function formatDateRange(start, end) {
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            const options = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-            const startStr = startDate.toLocaleDateString('id-ID', options);
-            const endStr = endDate.toLocaleDateString('id-ID', options);
+        // Helper function to parse ISO date string without timezone conversion
+        // This ensures "2026-01-30T07:00:00Z" is displayed as "30 Januari 2026 07:00"
+        function parseAsLocalTime(isoString) {
+            if (!isoString) return null;
+            // Remove "Z" suffix and parse as local time
+            const localStr = isoString.replace('Z', '');
+            const [datePart, timePart] = localStr.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            let hours = 0, minutes = 0;
+            if (timePart) {
+                const timeOnly = timePart.split(/[+-]/)[0]; // Remove timezone offset if any
+                [hours, minutes] = timeOnly.split(':').map(Number);
+            }
+            return new Date(year, month - 1, day, hours, minutes);
+        }
 
-            // Jika tanggal sama, hanya tampilkan sekali
+        function formatDateRange(start, end) {
+            const startDate = parseAsLocalTime(start);
+            const endDate = parseAsLocalTime(end);
+
+            if (!startDate || !endDate) return '-';
+
+            const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+
+            const startDateStr = startDate.toLocaleDateString('id-ID', dateOptions);
+            const startTimeStr = startDate.toLocaleTimeString('id-ID', timeOptions);
+            const endDateStr = endDate.toLocaleDateString('id-ID', dateOptions);
+            const endTimeStr = endDate.toLocaleTimeString('id-ID', timeOptions);
+
+            // If same day, show compact format
             if (startDate.toDateString() === endDate.toDateString()) {
-                return `${startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${startDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} - ${endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+                return `${startDateStr} pukul ${startTimeStr} - ${endTimeStr}`;
             }
 
-            return `${startStr} - ${endStr}`;
+            return `${startDateStr} pukul ${startTimeStr} - ${endDateStr} pukul ${endTimeStr}`;
+        }
+
+        function formatTime(dateString) {
+            if (!dateString) return '--:--';
+            const date = parseAsLocalTime(dateString);
+            if (!date) return '--:--';
+            return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
         }
 
         function logout() {
@@ -402,15 +490,44 @@
         const selectedDateLabel = document.getElementById('selected-date-label');
 
         const formatDateKey = (year, month, day) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const formatTime = (dateString) => {
-            if (!dateString) return '--:--';
-            return new Date(dateString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
-        };
 
         async function fetchSchedules() {
             try {
-                const data = await apiCall('/jadwal-ruangan');
-                allSchedules = data || [];
+                // Ambil jadwal ruangan yang sudah APPROVED
+                const approvedData = await apiCall('/jadwal-ruangan');
+
+                // Ambil peminjaman milik user sendiri (termasuk PENDING)
+                let myBookings = [];
+                try {
+                    const myData = await apiCall('/peminjaman/me');
+                    // Filter hanya yang PENDING dan punya ruangan
+                    myBookings = (myData || [])
+                        .filter(p => p.status === 'PENDING' && p.kode_ruangan)
+                        .map(p => ({
+                            kode_peminjaman: p.kode_peminjaman,
+                            kode_ruangan: p.kode_ruangan,
+                            nama_ruangan: p.ruangan?.nama_ruangan || 'Ruangan',
+                            tanggal_mulai: p.tanggal_mulai,
+                            tanggal_selesai: p.tanggal_selesai,
+                            status: p.status,
+                            peminjam: 'Anda (Menunggu Persetujuan)',
+                            kegiatan: p.kegiatan,
+                            is_pending: true // Flag untuk styling berbeda
+                        }));
+                } catch (e) {
+                    console.warn('Tidak bisa mengambil peminjaman user:', e);
+                }
+
+                // Gabungkan dan hapus duplikat (jika ada)
+                const combinedSchedules = [...(approvedData || [])];
+                myBookings.forEach(booking => {
+                    const exists = combinedSchedules.some(s => s.kode_peminjaman === booking.kode_peminjaman);
+                    if (!exists) {
+                        combinedSchedules.push(booking);
+                    }
+                });
+
+                allSchedules = combinedSchedules;
                 renderCalendar();
                 const today = new Date();
                 showScheduleForDate(today.getDate(), today.getMonth(), today.getFullYear());
@@ -439,12 +556,31 @@
 
             for (let i = 1; i <= lastDay; i++) {
                 const dateKey = formatDateKey(year, month, i);
-                const hasEvent = allSchedules.some((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+                const dayEvents = allSchedules.filter((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+                const hasApproved = dayEvents.some(s => !s.is_pending);
+                const hasPending = dayEvents.some(s => s.is_pending);
+                const hasEvent = dayEvents.length > 0;
                 const isToday = i === todayDate.getDate() && month === todayDate.getMonth() && year === todayDate.getFullYear();
                 const dayEl = document.createElement('div');
                 dayEl.className = `relative h-10 w-10 mx-auto flex flex-col items-center justify-center rounded-full cursor-pointer transition-all duration-200 ${isToday ? 'bg-orange-500 text-white shadow-md ring-2 ring-orange-100' : 'text-gray-700 hover:bg-orange-50'}`;
                 dayEl.onclick = () => showScheduleForDate(i, month, year);
-                dayEl.innerHTML = `<span class="text-sm font-medium">${i}</span>${hasEvent ? `<span class="absolute bottom-1 h-1.5 w-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-red-500'}"></span>` : ''}`;
+
+                // Dot warna berbeda: merah untuk APPROVED, kuning untuk PENDING
+                let dotHtml = '';
+                if (hasEvent) {
+                    if (hasApproved && hasPending) {
+                        // Kedua status ada - tampilkan 2 dot
+                        dotHtml = `<span class="absolute bottom-1 flex gap-0.5">
+                            <span class="h-1.5 w-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-green-500'}"></span>
+                            <span class="h-1.5 w-1.5 rounded-full ${isToday ? 'bg-yellow-200' : 'bg-yellow-500'}"></span>
+                        </span>`;
+                    } else if (hasApproved) {
+                        dotHtml = `<span class="absolute bottom-1 h-1.5 w-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-green-500'}"></span>`;
+                    } else if (hasPending) {
+                        dotHtml = `<span class="absolute bottom-1 h-1.5 w-1.5 rounded-full ${isToday ? 'bg-yellow-200' : 'bg-yellow-500'}"></span>`;
+                    }
+                }
+                dayEl.innerHTML = `<span class="text-sm font-medium">${i}</span>${dotHtml}`;
                 calendarGrid.appendChild(dayEl);
             }
         }
@@ -468,18 +604,27 @@
                 const namaKegiatan = j.kegiatan?.nama_kegiatan || 'Penggunaan Ruangan';
                 const peminjam = j.peminjam || '-';
                 const namaRuangan = j.nama_ruangan || 'Lokasi Belum Ditentukan';
+                const isPending = j.is_pending || j.status === 'PENDING';
+
+                // Styling berbeda untuk PENDING
+                const cardBorder = isPending ? 'border-yellow-200 bg-yellow-50/30' : 'border-gray-100';
+                const decorBg = isPending ? 'bg-yellow-100' : 'bg-orange-50';
+                const iconBg = isPending ? 'bg-yellow-100 text-yellow-600' : 'bg-orange-100 text-orange-600';
+                const timeBadge = isPending ? 'text-yellow-600 bg-yellow-50 border-yellow-100' : 'text-orange-600 bg-orange-50 border-orange-100';
+                const statusBadge = isPending ? '<span class="absolute top-2 right-2 px-2 py-0.5 text-[10px] font-bold bg-yellow-100 text-yellow-700 rounded-full border border-yellow-200">PENDING</span>' : '';
 
                 return `
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 hover:border-orange-200 transition-all hover:shadow-md group flex flex-col h-full relative overflow-hidden">
+                <div class="bg-white rounded-2xl p-5 border ${cardBorder} hover:border-orange-200 transition-all hover:shadow-md group flex flex-col h-full relative overflow-hidden">
+                    ${statusBadge}
                     <!-- Decorative Element -->
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-orange-50 rounded-bl-[3rem] -mr-3 -mt-3 transition-transform group-hover:scale-110"></div>
+                    <div class="absolute top-0 right-0 w-20 h-20 ${decorBg} rounded-bl-[3rem] -mr-3 -mt-3 transition-transform group-hover:scale-110"></div>
                     
                     <!-- Header: Icon + Time Badge -->
                     <div class="relative z-10 mb-3 flex items-start justify-between">
-                        <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
+                        <div class="w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                         </div>
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold ${timeBadge} px-2.5 py-1 rounded-lg border">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             ${jamMulai} - ${jamSelesai}
                         </div>
