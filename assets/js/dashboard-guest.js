@@ -87,6 +87,7 @@ const renderCalendar = () => {
 };
 
 const showScheduleForDate = (day, month, year) => {
+  window.currentlySelectedDate = new Date(year, month, day);
   const dateKey = formatDateKey(year, month, day);
   const dateObj = new Date(year, month, day);
   if (selectedDateLabel) {
@@ -116,56 +117,92 @@ const showScheduleForDate = (day, month, year) => {
   }
 
   // Render Cards - Detailed Block Style
-  jadwalContainer.innerHTML = dailySchedules
-    .map((j) => {
-      const jamMulai = formatTime(j.tanggal_mulai);
-      const jamSelesai = formatTime(j.tanggal_selesai);
-      const namaKegiatan = j.kegiatan?.nama_kegiatan || j.kegiatan || 'Penggunaan Ruangan';
-      const peminjam = j.peminjam || '-';
-      const namaRuangan = j.nama_ruangan || 'Lokasi Belum Ditentukan';
+  jadwalContainer.innerHTML = dailySchedules.map((j) => {
+    const jamMulai = formatTime(j.tanggal_mulai);
+    const jamSelesai = formatTime(j.tanggal_selesai);
+    const namaKegiatan = j.kegiatan?.nama_kegiatan || 'Penggunaan Ruangan';
+    const peminjam = j.peminjam || '-';
+    const namaRuangan = j.nama_ruangan || 'Lokasi Belum Ditentukan';
+    const organisasi = j.organisasi || j.kegiatan?.organisasi?.kode_organisasi || '-';
+    const status = j.status || 'APPROVED';
+    const isPending = j.is_pending || status === 'PENDING';
+    const isApproved = status === 'APPROVED';
 
-      return `
-        <div class="bg-white rounded-2xl p-5 border border-gray-100 hover:border-orange-200 transition-all hover:shadow-md group flex flex-col h-full relative overflow-hidden">
+    let cardBorder, decorBg, iconBg, timeBadge, statusBadgeText, statusTextColor;
+
+    if (isPending) {
+      // PENDING - Abu-abu
+      cardBorder = 'border-2 border-gray-300 bg-gray-50/30';
+      decorBg = 'bg-gray-100';
+      iconBg = 'bg-gray-100 text-gray-600';
+      timeBadge = 'text-gray-600 bg-gray-50 border-gray-200';
+      statusBadgeText = 'BOOKED';
+      statusTextColor = 'text-gray-500';
+    } else if (isApproved) {
+      // APPROVED - Orange
+      cardBorder = 'border-2 border-orange-300 bg-orange-50/30';
+      decorBg = 'bg-orange-100';
+      iconBg = 'bg-orange-100 text-orange-600';
+      timeBadge = 'text-orange-600 bg-orange-50 border-orange-200';
+      statusBadgeText = 'DISETUJUI';
+      statusTextColor = 'text-orange-600';
+    } else {
+      // Fallback
+      cardBorder = 'border-2 border-green-300 bg-green-50/30';
+      decorBg = 'bg-green-100';
+      iconBg = 'bg-green-100 text-green-600';
+      timeBadge = 'text-green-600 bg-green-50 border-green-200';
+      statusBadgeText = 'AVAILABLE';
+      statusTextColor = 'text-green-600';
+    }
+
+    return `
+        <div class="bg-white rounded-xl p-3 ${cardBorder} hover:shadow-md transition-all group flex flex-col relative overflow-hidden">
             <!-- Decorative Element -->
-            <div class="absolute top-0 right-0 w-20 h-20 bg-orange-50 rounded-bl-[3rem] -mr-3 -mt-3 transition-transform group-hover:scale-110"></div>
+            <div class="absolute top-0 right-0 w-16 h-16 ${decorBg} rounded-bl-[2.5rem] -mr-2 -mt-2 transition-transform group-hover:scale-110"></div>
             
             <!-- Header: Icon + Time Badge -->
-            <div class="relative z-10 mb-3 flex items-start justify-between">
-                <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            <div class="relative z-10 mb-2 flex items-start justify-between">
+                <div class="w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 </div>
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    ${jamMulai} - ${jamSelesai}
+                <div class="flex flex-col items-end gap-0.5">
+                    <div class="flex items-center gap-1 text-[11px] font-semibold ${timeBadge} px-2 py-0.5 rounded-md border">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        ${jamMulai} - ${jamSelesai}
+                    </div>
+                    <span class="text-[9px] font-bold ${statusTextColor}">${statusBadgeText}</span>
                 </div>
             </div>
 
             <!-- Content -->
-            <div class="relative z-10 space-y-3 flex-1">
+            <div class="relative z-10 space-y-1.5 flex-1">
                 <!-- Room Name (Primary) -->
                 <div>
-                    <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-wide mb-0.5">Ruangan</p>
-                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-orange-600 transition-colors leading-tight">${namaRuangan}</h4>
+                    <p class="text-[9px] text-gray-400 uppercase font-semibold tracking-wide mb-0.5">Ruangan</p>
+                    <h4 class="text-sm font-bold text-gray-900 group-hover:text-orange-600 transition-colors leading-tight">${namaRuangan}</h4>
                 </div>
                 
                 <!-- Activity Name -->
                 <div>
-                    <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-wide mb-0.5">Kegiatan</p>
-                    <p class="text-sm font-medium text-gray-700">${namaKegiatan}</p>
+                    <p class="text-[9px] text-gray-400 uppercase font-semibold tracking-wide">Kegiatan</p>
+                    <p class="text-xs font-medium text-gray-700">${namaKegiatan}</p>
                 </div>
                 
-                <!-- Borrower Info -->
-                <div class="pt-2 border-t border-dashed border-gray-100">
-                    <div class="flex items-center gap-2 text-sm text-gray-500">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <span class="font-medium">${peminjam}</span>
+                <!-- Borrower Info with Organization -->
+                <div class="pt-1.5 border-t border-dashed border-gray-100">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            <span class="font-medium text-[11px]">${peminjam}</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 text-[9px] font-bold bg-gray-100 text-gray-600 rounded border border-gray-200">${organisasi}</span>
                     </div>
                 </div>
             </div>
         </div>
-       `;
-    })
-    .join('');
+        `;
+  }).join('');
 };
 
 window.changeMonth = (direction) => {

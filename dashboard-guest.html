@@ -114,20 +114,54 @@
       </div>
 
       <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-        <div class="p-6 border-b border-orange-100 flex flex-col gap-2">
-          <p class="text-xs uppercase tracking-widest text-orange-500 font-semibold">Jadwal Harian</p>
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-semibold text-gray-900">Agenda Tanggal Terpilih</h3>
-            <span id="selected-date-label"
-              class="inline-flex flex-col items-center justify-center text-sm font-semibold text-orange-600 bg-orange-50 px-4 py-1.5 rounded-full border border-orange-100 text-center leading-tight min-w-[140px]">
-              Hari Ini
-            </span>
+        <div class="p-6 border-b border-orange-100 flex flex-col gap-4">
+          <!-- Header Title -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <p class="text-[10px] uppercase tracking-widest text-orange-500 font-bold">Jadwal Harian</p>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 leading-tight">Agenda Kegiatan</h3>
+            <p class="text-xs text-gray-500 mt-1">Klik tanggal pada kalender untuk melihat detail agenda.</p>
           </div>
-          <p class="text-xs text-gray-500">Klik tanggal pada kalender untuk menampilkan detail kegiatan pada ruangan.
-          </p>
+
+          <!-- Action Bar -->
+          <div class="flex items-center gap-3">
+            <!-- Date Display -->
+            <div
+              class="flex-1 bg-orange-50/40 border border-orange-100 rounded-2xl p-2.5 flex items-center gap-3 min-w-0">
+              <div
+                class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 flex-shrink-0 shadow-inner">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-[9px] text-orange-400 font-bold uppercase tracking-wider">Tanggal Terpilih</span>
+                <span id="selected-date-label" class="text-xs font-bold text-gray-900 truncate">Hari Ini</span>
+              </div>
+            </div>
+
+            <!-- Availability Button -->
+            <button onclick="showAvailableRooms()"
+              class="flex-shrink-0 bg-white border border-gray-100 text-gray-600 shadow-sm hover:shadow-md hover:border-orange-200 hover:text-orange-600 px-4 py-2 rounded-2xl flex items-center gap-2 transition-all active:scale-95 group">
+              <div class="text-left leading-none">
+                <span
+                  class="block text-[9px] font-bold text-gray-400 group-hover:text-orange-400 uppercase tracking-wider">Cek</span>
+                <span class="block text-xs font-bold">Ruangan</span>
+              </div>
+              <svg class="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                </path>
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div id="jadwal-list-container" class="p-6 space-y-4 flex-1 overflow-y-auto no-scrollbar">
+        <div id="jadwal-list-container" class="p-6 space-y-4 flex-1 overflow-y-auto no-scrollbar"
+          style="max-height: 260px;">
           <p class="text-center text-gray-400 text-sm py-8 italic">Pilih tanggal di atas untuk melihat detail.</p>
         </div>
       </div>
@@ -204,5 +238,149 @@
   </main>
   <script type="module" src="assets/js/dashboard-guest.js"></script>
 </body>
+
+
+<!-- MODAL CEK RUANGAN -->
+<div id="modalAvailableRooms" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog"
+  aria-modal="true">
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-gray-900/30 backdrop-blur-sm transition-opacity"
+    onclick="document.getElementById('modalAvailableRooms').classList.add('hidden')"></div>
+
+  <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+    <div
+      class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+      <!-- Header Modal -->
+      <div class="bg-orange-50 px-6 py-4 border-b border-orange-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 leading-6" id="modal-title">Ketersediaan Ruangan</h3>
+          <p class="text-sm text-orange-600 font-medium mt-1" id="modalDateLabel">Checking...</p>
+        </div>
+        <button onclick="document.getElementById('modalAvailableRooms').classList.add('hidden')"
+          class="text-gray-400 hover:text-gray-500">
+          <svg class="h-6 w-6" fill="none" type="button" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Legend -->
+      <div
+        class="bg-white px-6 py-3 border-b border-gray-100 flex items-center gap-4 text-xs font-semibold text-gray-600 overflow-x-auto">
+        <div class="flex items-center gap-1.5 whitespace-nowrap"><span
+            class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Disetujui (Oren)</div>
+        <div class="flex items-center gap-1.5 whitespace-nowrap"><span
+            class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Tersedia (Hijau)</div>
+        <div class="flex items-center gap-1.5 whitespace-nowrap"><span
+            class="w-2.5 h-2.5 rounded-full bg-gray-400"></span> Booked (Abu)</div>
+      </div>
+
+      <!-- Content -->
+      <div class="bg-gray-50/50 px-6 py-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+        <div id="availableRoomsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Loading State -->
+          <div class="col-span-full space-y-3">
+            <div class="h-24 bg-gray-100 rounded-xl animate-pulse"></div>
+            <div class="h-24 bg-gray-100 rounded-xl animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="bg-white px-6 py-4 flex flex-row-reverse border-t border-gray-100">
+        <button type="button"
+          class="inline-flex w-full justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:w-auto"
+          onclick="document.getElementById('modalAvailableRooms').classList.add('hidden')">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function showAvailableRooms() {
+    const modal = document.getElementById('modalAvailableRooms');
+    const container = document.getElementById('availableRoomsContainer');
+    const dateLabel = document.getElementById('modalDateLabel');
+
+    modal.classList.remove('hidden');
+
+    const date = window.currentlySelectedDate || new Date();
+    const dateKey = typeof formatDateKey === 'function' ? formatDateKey(date.getFullYear(), date.getMonth(), date.getDate()) : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+    dateLabel.textContent = date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400 font-medium">Memuat data ketersediaan...</div>';
+
+    try {
+      // Fetch Data Ruangan & Jadwal (Public Endpoints)
+      // Note: In real app, consider a single endpoint like /api/availability?date=...
+      const [ruanganRes, jadwalRes] = await Promise.all([
+        fetch('http://localhost:8000/api/ruangan').then(r => r.json()),
+        fetch('http://localhost:8000/api/jadwal-ruangan').then(r => r.json())
+      ]);
+
+      const daySchedules = jadwalRes.filter(s => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+
+      if (!Array.isArray(ruanganRes) || ruanganRes.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500">Tidak ada data ruangan.</div>';
+        return;
+      }
+
+      container.innerHTML = ruanganRes.map(room => {
+        const globalBookings = daySchedules.filter(s => s.kode_ruangan === room.kode_ruangan);
+        globalBookings.sort((a, b) => new Date(a.tanggal_mulai) - new Date(b.tanggal_mulai));
+
+        let contentHtml = '';
+
+        if (globalBookings.length === 0) {
+          contentHtml = `
+                        <div class="mt-3 flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg border border-green-100 text-green-700">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 filter drop-shadow"></span>
+                            <span class="text-xs font-bold">Sepenuhnya Tersedia</span>
+                        </div>`;
+        } else {
+          contentHtml = `<div class="mt-3 space-y-2">` + globalBookings.map(booking => {
+            const start = new Date(booking.tanggal_mulai).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            const end = new Date(booking.tanggal_selesai).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+
+            const status = booking.status || 'APPROVED';
+            const isPending = status === 'PENDING';
+
+            const bgClass = isPending ? 'bg-gray-50 border-gray-200 text-gray-600' : 'bg-orange-50 border-orange-100 text-orange-700';
+            const dotClass = isPending ? 'bg-gray-400' : 'bg-orange-500';
+            const label = isPending ? 'BOOKED (PENDING)' : 'DISETUJUI';
+
+            return `
+                            <div class="flex items-center justify-between px-3 py-2 rounded-lg border ${bgClass}">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>
+                                    <span class="text-xs font-bold">${start} - ${end}</span>
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider opacity-90">${label}</span>
+                            </div>`;
+          }).join('') + `</div>`;
+        }
+
+        return `
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all relative group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-base">${room.nama_ruangan}</h4>
+                                <p class="text-[10px] text-gray-500 mt-0.5">${room.lokasi || 'Lokasi umum'} • Kapasitas ${room.kapasitas} Org</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            </div>
+                        </div>
+                        ${contentHtml}
+                    </div>
+                    `;
+      }).join('');
+
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      container.innerHTML = '<div class="col-span-full text-center py-8 text-red-500 text-sm">Gagal memuat ketersediaan. Silakan coba lagi.</div>';
+    }
+  }
+</script>
 
 </html>
