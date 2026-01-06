@@ -69,7 +69,8 @@ const renderCalendar = () => {
 
     for (let i = 1; i <= lastDay; i++) {
         const dateKey = formatDateKey(year, month, i);
-        const hasEvent = allSchedules.some((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+        const dailyEvents = allSchedules.filter((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+        const eventCount = dailyEvents.length;
         const isToday = i === todayDate.getDate() && month === todayDate.getMonth() && year === todayDate.getFullYear();
 
         const dayEl = document.createElement('div');
@@ -80,9 +81,26 @@ const renderCalendar = () => {
 
         dayEl.onclick = () => showScheduleForDate(i, month, year);
 
+        // Logic Dot dynamic: Jika > 1 tampilkan 2 dot, jika 1 tampilkan 1 dot
+        let dotsHtml = '';
+        if (eventCount > 0) {
+            const dotColor = isToday ? 'bg-white' : 'bg-red-500';
+            if (eventCount > 1) {
+                // 2 Dots
+                dotsHtml = `
+                <div class="absolute bottom-1.5 flex gap-0.5">
+                    <span class="h-1 w-1 rounded-full ${dotColor}"></span>
+                    <span class="h-1 w-1 rounded-full ${dotColor}"></span>
+                </div>`;
+            } else {
+                // 1 Dot
+                dotsHtml = `<span class="absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${dotColor}"></span>`;
+            }
+        }
+
         dayEl.innerHTML = `
-      <span class="text-sm font-medium relative z-10">${i}</span>
-      ${hasEvent ? `<span class="absolute bottom-1 h-1.5 w-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-red-500'}"></span>` : ''}
+      <span class="text-sm font-medium relative z-10 ${eventCount > 0 ? '-mt-1' : ''}">${i}</span>
+      ${dotsHtml}
     `;
 
         calendarGrid.appendChild(dayEl);
@@ -125,7 +143,7 @@ const showScheduleForDate = (day, month, year) => {
     jadwalContainer.innerHTML = dailySchedules.map((j) => {
         const jamMulai = formatTime(j.tanggal_mulai);
         const jamSelesai = formatTime(j.tanggal_selesai);
-        const namaKegiatan = j.kegiatan?.nama_kegiatan || 'Penggunaan Ruangan';
+        const namaKegiatan = j.nama_kegiatan || j.kegiatan?.nama_kegiatan || 'Penggunaan Ruangan';
         const peminjam = j.peminjam || '-';
         const namaRuangan = j.nama_ruangan || 'Lokasi Belum Ditentukan';
         const organisasi = j.organisasi || j.kegiatan?.organisasi?.kode_organisasi || '-';

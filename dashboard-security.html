@@ -408,7 +408,8 @@
 
             for (let i = 1; i <= lastDay; i++) {
                 const dateKey = formatDateKey(year, month, i);
-                const hasEvent = allSchedules.some((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+                const dailyEvents = allSchedules.filter((s) => s.tanggal_mulai && s.tanggal_mulai.startsWith(dateKey));
+                const eventCount = dailyEvents.length;
                 const isToday = i === todayDate.getDate() && month === todayDate.getMonth() && year === todayDate.getFullYear();
 
                 const dayEl = document.createElement('div');
@@ -417,9 +418,24 @@
                     ${isToday ? 'bg-orange-500 text-white shadow-md ring-2 ring-orange-100' : 'text-gray-700 hover:bg-orange-50'}
                 `;
                 dayEl.onclick = () => showScheduleForDate(i, month, year);
+
+                let dotsHtml = '';
+                if (eventCount > 0) {
+                    const dotColor = isToday ? 'bg-white' : 'bg-red-500';
+                    if (eventCount > 1) {
+                        dotsHtml = `
+                        <div class="absolute bottom-0.5 sm:bottom-1 flex gap-0.5">
+                            <span class="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${dotColor}"></span>
+                            <span class="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${dotColor}"></span>
+                        </div>`;
+                    } else {
+                        dotsHtml = `<span class="absolute bottom-0.5 sm:bottom-1 h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${dotColor}"></span>`;
+                    }
+                }
+
                 dayEl.innerHTML = `
-                    <span class="text-xs sm:text-sm font-medium relative z-10">${i}</span>
-                    ${hasEvent ? `<span class="absolute bottom-0.5 sm:bottom-1 h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-red-500'}"></span>` : ''}
+                    <span class="text-xs sm:text-sm font-medium relative z-10 ${eventCount > 0 ? '-mt-1' : ''}">${i}</span>
+                    ${dotsHtml}
                 `;
                 calendarGrid.appendChild(dayEl);
             }
@@ -456,7 +472,7 @@
             jadwalListContainer.innerHTML = dailySchedules.map((j) => {
                 const jamMulai = formatTime(j.tanggal_mulai);
                 const jamSelesai = formatTime(j.tanggal_selesai);
-                const namaKegiatan = j.kegiatan?.nama_kegiatan || 'Penggunaan Ruangan';
+                const namaKegiatan = j.nama_kegiatan || j.kegiatan?.nama_kegiatan || 'Penggunaan Ruangan';
                 const peminjam = j.peminjam || '-';
                 const namaRuangan = j.nama_ruangan || 'Lokasi Belum Ditentukan';
                 const organisasi = j.organisasi || j.kegiatan?.organisasi?.kode_organisasi || '-';
