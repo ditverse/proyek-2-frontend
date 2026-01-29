@@ -511,17 +511,19 @@
 
         // --- VALIDASI JAM KERJA ---
         // Jam kerja: Senin-Jumat 07:00-17:00
+        // DEMO MODE: Pembatasan jam kerja dinonaktifkan untuk keperluan demo
         function isWorkingHours() {
-            const now = new Date();
-            const day = now.getDay(); // 0 = Minggu, 1-5 = Senin-Jumat, 6 = Sabtu
-            const hour = now.getHours();
+            // const now = new Date();
+            // const day = now.getDay(); // 0 = Minggu, 1-5 = Senin-Jumat, 6 = Sabtu
+            // const hour = now.getHours();
 
-            // Cek apakah hari kerja (Senin = 1 sampai Jumat = 5)
-            const isWeekday = day >= 1 && day <= 5;
-            // Cek apakah dalam jam kerja (07:00 - 17:00)
-            const isWorkTime = hour >= 7 && hour < 17;
+            // // Cek apakah hari kerja (Senin = 1 sampai Jumat = 5)
+            // const isWeekday = day >= 1 && day <= 5;
+            // // Cek apakah dalam jam kerja (07:00 - 17:00)
+            // const isWorkTime = hour >= 7 && hour < 17;
 
-            return isWeekday && isWorkTime;
+            // return isWeekday && isWorkTime;
+            return true; // DEMO MODE: Selalu return true
         }
 
         // Fungsi untuk setup card Ajukan Peminjaman

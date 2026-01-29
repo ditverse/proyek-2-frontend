@@ -189,20 +189,23 @@
 
         // --- VALIDASI JAM KERJA ---
         // Cek apakah dalam jam kerja (Senin-Jumat 07:00-17:00)
+        // DEMO MODE: Pembatasan jam kerja dinonaktifkan untuk keperluan demo
         function isWorkingHours() {
-            const now = new Date();
-            const day = now.getDay();
-            const hour = now.getHours();
-            const isWeekday = day >= 1 && day <= 5;
-            const isWorkTime = hour >= 7 && hour < 17;
-            return isWeekday && isWorkTime;
+            // const now = new Date();
+            // const day = now.getDay();
+            // const hour = now.getHours();
+            // const isWeekday = day >= 1 && day <= 5;
+            // const isWorkTime = hour >= 7 && hour < 17;
+            // return isWeekday && isWorkTime;
+            return true; // DEMO MODE: Selalu return true
         }
 
         // Redirect jika di luar jam kerja
-        if (!isWorkingHours()) {
-            alert('Pengajuan peminjaman hanya dapat dilakukan pada jam kerja:\nSenin - Jumat, pukul 07:00 - 17:00 WIB');
-            window.location.href = 'dashboard-mahasiswa.html';
-        }
+        // DEMO MODE: Dinonaktifkan
+        // if (!isWorkingHours()) {
+        //     alert('Pengajuan peminjaman hanya dapat dilakukan pada jam kerja:\nSenin - Jumat, pukul 07:00 - 17:00 WIB');
+        //     window.location.href = 'dashboard-mahasiswa.html';
+        // }
 
         // Variabel global
         let selectedDateObjects = [];
