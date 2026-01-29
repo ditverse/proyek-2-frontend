@@ -182,7 +182,7 @@
                     <div id="itemsSection"
                         class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-orange-100 hidden">
                         <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                            <span class="w-1.5 h-6 bg-amber-500 rounded-full"></span>
                             Barang yang Dipinjam
                         </h3>
                         <div class="overflow-hidden rounded-2xl border border-gray-100">
@@ -277,15 +277,20 @@
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div
                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-red-100">
-                    <div class="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-4">
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                </path>
-                            </svg>
-                            Konfirmasi Pembatalan
-                        </h3>
+                    <div class="bg-gradient-to-r from-red-50 to-rose-50 px-6 py-5 border-b border-red-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Konfirmasi Pembatalan</h3>
+                                <p class="text-red-600 text-xs font-medium">Tindakan ini tidak dapat dibatalkan</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="px-6 py-6 space-y-4">
@@ -322,6 +327,20 @@
     <script src="assets/js/api.legacy.js"></script>
     <script>
         checkAuth();
+
+        // Helper function to parse ISO date string without timezone conversion
+        function parseAsLocalTime(isoString) {
+            if (!isoString) return null;
+            const localStr = isoString.replace('Z', '');
+            const [datePart, timePart] = localStr.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            let hours = 0, minutes = 0;
+            if (timePart) {
+                const timeOnly = timePart.split(/[+-]/)[0];
+                [hours, minutes] = timeOnly.split(':').map(Number);
+            }
+            return new Date(year, month - 1, day, hours, minutes);
+        }
 
         // Elements
         const loadingState = document.getElementById('loadingState');
@@ -380,14 +399,14 @@
                 // Activity Details
                 document.getElementById('detailKegiatan').textContent = data.kegiatan?.nama_kegiatan || '-';
 
-                const startDate = new Date(data.tanggal_mulai);
-                const endDate = new Date(data.tanggal_selesai);
+                const startDate = parseAsLocalTime(data.tanggal_mulai);
+                const endDate = parseAsLocalTime(data.tanggal_selesai);
 
                 document.getElementById('detailMulaiDate').textContent = startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                document.getElementById('detailMulaiTime').textContent = startDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+                document.getElementById('detailMulaiTime').textContent = startDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' WIB';
 
                 document.getElementById('detailSelesaiDate').textContent = endDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                document.getElementById('detailSelesaiTime').textContent = endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+                document.getElementById('detailSelesaiTime').textContent = endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' WIB';
 
                 // Items List
                 if (data.barang && data.barang.length > 0) {
@@ -435,10 +454,22 @@
                 classes = 'bg-red-100 text-red-700 border-red-200';
                 label = 'Ditolak';
                 icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
-            } else {
-                classes = 'bg-blue-100 text-blue-700 border-blue-200';
+            } else if (status === 'ONGOING') {
+                classes = 'bg-amber-100 text-amber-700 border-amber-200';
+                label = 'Sedang Berlangsung';
+                icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>';
+            } else if (status === 'FINISHED') {
+                classes = 'bg-slate-100 text-slate-700 border-slate-200';
                 label = 'Selesai';
                 icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            } else if (status === 'CANCELLED') {
+                classes = 'bg-stone-100 text-stone-700 border-stone-200';
+                label = 'Dibatalkan';
+                icon = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>';
+            } else {
+                classes = 'bg-gray-100 text-gray-700 border-gray-200';
+                label = status;
+                icon = '';
             }
 
             container.innerHTML = `
@@ -500,7 +531,9 @@
             } else {
                 // Verified State
                 let colorClass = data.status === 'APPROVED' ? 'bg-green-500' : 'bg-red-500';
-                if (data.status === 'FINISHED') colorClass = 'bg-blue-500';
+                if (data.status === 'FINISHED') colorClass = 'bg-slate-500';
+                if (data.status === 'ONGOING') colorClass = 'bg-amber-500';
+                if (data.status === 'CANCELLED') colorClass = 'bg-stone-500';
 
                 dot2.className = `absolute -left-[21px] top-1 w-3 h-3 rounded-full ${colorClass} border-2 border-white shadow-sm`;
 

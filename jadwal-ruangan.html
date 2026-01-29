@@ -227,13 +227,29 @@
             periodLabel.textContent = `${startDate.toLocaleDateString('id-ID', options)} — ${endDate.toLocaleDateString('id-ID', options)}`;
         }
 
+        // Helper function to parse ISO date string without timezone conversion
+        function parseAsLocalTime(isoString) {
+            if (!isoString) return null;
+            const localStr = isoString.replace('Z', '');
+            const [datePart, timePart] = localStr.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            let hours = 0, minutes = 0;
+            if (timePart) {
+                const timeOnly = timePart.split(/[+-]/)[0];
+                [hours, minutes] = timeOnly.split(':').map(Number);
+            }
+            return new Date(year, month - 1, day, hours, minutes);
+        }
+
         function formatDateTime(dateStr) {
-            return new Date(dateStr).toLocaleString('id-ID', {
+            const date = parseAsLocalTime(dateStr);
+            return date.toLocaleString('id-ID', {
                 weekday: 'short',
                 day: 'numeric',
                 month: 'long',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: false
             });
         }
 

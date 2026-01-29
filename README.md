@@ -1,56 +1,102 @@
-# frontend-sarpras
+# Frontend Sistem Peminjaman Sarana Prasarana
 
-Static frontend for Sistem Peminjaman Sarpras — HTML + Tailwind (CDN) + native JavaScript.
+Repository ini berisi kode sumber antarmuka pengguna (Frontend) untuk Sistem Informasi Peminjaman Sarana dan Prasarana Kampus. Aplikasi ini dibangun menggunakan HTML5, JavaScript (Native/Vanilla), dan CSS Framework (Tailwind CSS via CDN).
 
-This folder is intended to be deployed as a static site (GitHub Pages).
+## 📋 Daftar Isi
+- [Struktur Halaman](#struktur-halaman)
+- [Teknologi](#teknologi)
+- [Konfigurasi](#konfigurasi)
+- [Panduan Pengembangan](#panduan-pengembangan)
+- [Deployment](#deployment)
 
-## Struktur singkat
+---
 
-- `index.html` — halaman login
-- `sarpras.html`, `mahasiswa.html`, `security.html` — dashboard (contoh)
-- `assets/js/config.js` — konfigurasi `API_BASE_URL`
-- `assets/js/api.js` — helper fetch + auth
-- `assets/js/auth.js` — login handler
+## Struktur Halaman
 
-## Konfigurasi sebelum deploy
+Aplikasi terdiri dari beberapa halaman utama yang dikelompokkan berdasarkan fungsi dan role pengguna.
 
-1. Update `assets/js/config.js`:
-   - Set `API_BASE_URL` ke URL produksi backend Anda (harus HTTPS), mis. `https://api.sarpras.example.com/api`.
-   - Atau atur `window.API_BASE_URL` di halaman HTML sebelum memuat bundle JS.
+### 🔐 Autentikasi
+- **`index.html`**: Halaman Login utama. Role pengguna dideteksi otomatis setelah login.
+- **`register.html`**: Pendaftaran akun baru (Biasanya diakses oleh Admin/Sarpras).
 
-2. Pastikan backend menerima permintaan dari origin GitHub Pages Anda:
-   - Jika site GitHub Pages berada di `https://<username>.github.io` atau `https://<username>.github.io/<repo>`
-     set env var `CORS_ALLOWED_ORIGIN=https://<username>.github.io` pada backend.
+### 🎓 Mahasiswa
+- **`dashboard-mahasiswa.html`**: Halaman utama mahasiswa. Menampilkan jadwal hari ini.
+- **`jadwal-ruangan.html`**: Kalender ketersediaan ruangan.
+- **`pengajuan-peminjaman.html`**: Form untuk mengajukan peminjaman baru.
+- **`riwayat-peminjaman.html`**: Daftar status pengajuan (Pending, Approved, Rejected).
+- **`detail-laporan-peminjaman.html`**: Detail lengkap dari satu item peminjaman.
 
-3. Pastikan backend tersedia via HTTPS (GitHub Pages memakai HTTPS; mixed-content tidak diizinkan).
+### 🛠 Staff Sarpras
+- **`sarpras.html`**: Dashboard utama Sarpras. Ringkasan pengajuan waiting list.
+- **`verifikasi-peminjaman.html`**: Daftar pengajuan yang perlu diverifikasi (Approve/Reject).
+- **`kelola-ruangan.html`**: CRUD Data Ruangan.
+- **`kelola-barang.html`**: CRUD Data Barang.
+- **`laporan-peminjaman.html`**: Rekapitulasi data peminjaman.
 
-## Publish ke GitHub Pages (singkat)
+### 🛡️ Security
+- **`dashboard-security.html`**: Dashboard operasional security.
+- **`riwayat-kehadiran.html`**: Log kehadiran peminjam yang sudah diverifikasi.
 
-1. Inisialisasi git di folder ini (jika belum):
+### 👤 Guest / Umum
+- **`dashboard-guest.html`**: Halaman publik untuk melihat jadwal ruangan tanpa login.
 
-```powershell
-Set-Location -Path "d:\Kuliah\Proyek 2\proyek-2-golang\frontend-sarpras"
-git init
-git checkout -b main
-git remote add origin https://github.com/<username>/frontend-sarpras.git
-git add .
-git commit -m "chore: initial frontend-sarpras"
-git push -u origin main
-```
+---
 
-2. Di GitHub: buka repo → Settings → Pages → Source: `main` branch, folder `/ (root)` → Save.
-   - URL akan menjadi `https://<username>.github.io/frontend-sarpras/` (atau `https://<username>.github.io/` untuk user page)
+## Teknologi
 
-3. Setelah deploy, buka URL dan uji login / network tab.
+- **Core**: HTML5, Vanilla JavaScript (ES6+)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (menggunakan CDN script, tidak perlu build process).
+- **Icons**: FontAwesome / SVG.
+- **HTTP Client**: `fetch` API native browser.
+- **Alerts**: [SweetAlert2](https://sweetalert2.github.io/) untuk popup notifikasi yang cantik.
 
-## Troubleshooting cepat
+---
 
-- CORS error: periksa header `Access-Control-Allow-Origin` dari backend.
-- Mixed content: pastikan backend HTTPS.
-- 401 Unauthorized: pastikan token disimpan di `localStorage` dan header `Authorization: Bearer <token>` dikirim.
+## Konfigurasi
 
-## Optional: Automate with GitHub Actions
+Sebelum menjalankan aplikasi, pastikan konfigurasi API Backend sudah sesuai.
 
-Jika Anda ingin deploy otomatis, tambahkan workflow untuk push ke `gh-pages` atau gunakan Pages from `main`.
+1. Buka file `assets/js/config.js` (jika ada) atau periksa bagian `<script>` global.
+2. Pastikan `API_BASE_URL` mengarah ke backend yang berjalan.
+   - Development: `http://localhost:8000/api`
+   - Production: `https://api.yourdomain.com/api`
 
-Jika Anda ingin, saya bisa membuatkan file GitHub Actions deploy otomatis.
+### Setup Localhost (Live Server)
+Disarankan menggunakan ekstensi **Live Server** di VS Code untuk menghindari masalah CORS pada file lokal.
+1. Install ekstensi "Live Server".
+2. Klik kanan pada `index.html` -> "Open with Live Server".
+3. Aplikasi akan berjalan di `http://127.0.0.1:5500`.
+
+---
+
+## Panduan Pengembangan
+
+### Menambah Halaman Baru
+1. Copy template dari salah satu file dashboard (misal `dashboard-mahasiswa.html`) untuk mempertahankan struktur Sidebar dan Navbar.
+2. Sesuaikan konten di dalam tag `<main>`.
+3. Tambahkan logika JavaScript di bagian bawah body atau di file terpisah dalam `assets/js/`.
+
+### Struktur Script
+Hampir setiap halaman memiliki struktur script standar:
+1. **Auth Check**: Memeriksa token di `localStorage`. Jika tidak ada, redirect ke login.
+2. **Role Check**: Memastikan user memiliki hak akses ke halaman tersebut.
+3. **Load Data**: Mengambil data dari API saat halaman dimuat (`DOMContentLoaded`).
+4. **Event Listeners**: Menangani klik tombol (Submit, Approve, dll).
+
+---
+
+## Deployment
+
+Aplikasi ini bersifat **Static Site**, sehingga dapat di-deploy dengan sangat mudah di:
+- **GitHub Pages** (Rekomendasi)
+- **Netlify**
+- **Vercel**
+- **Apache/Nginx Web Server**
+
+### Cara Deploy ke GitHub Pages
+1. Push kode ke repository GitHub.
+2. Masuk ke **Settings** > **Pages**.
+3. Pilih source branch (misal `main`) dan folder root (`/`).
+4. Website akan aktif dalam beberapa menit.
+
+> **PENTING**: Karena ini adalah Frontend terpisah, pastikan Backend Anda mengizinkan CORS dari domain frontend Anda.
