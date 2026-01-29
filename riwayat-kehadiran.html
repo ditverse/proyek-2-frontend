@@ -202,11 +202,11 @@
 
     function getStatusBadge(status) {
       const statusMap = {
-        'HADIR': { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', icon: '✅' },
-        'TIDAK_HADIR': { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: '❌' },
-        'TERLAMBAT': { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200', icon: '⏰' }
+        'HADIR': { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', icon: '' },
+        'TIDAK_HADIR': { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: '' },
+        'TERLAMBAT': { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200', icon: '' }
       };
-      const s = statusMap[status] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: '❓' };
+      const s = statusMap[status] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: '' };
       return `<span class="px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold ${s.bg} ${s.text} border ${s.border}">${s.icon} ${status || 'Unknown'}</span>`;
     }
 
